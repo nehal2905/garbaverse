@@ -1,0 +1,111 @@
+import "server-only";
+import { Resend } from "resend";
+import { render } from "@react-email/render";
+import React from "react";
+import PassEmail from "@/emails/PassEmail";
+import { env } from "./env";
+import { EVENT, EVENT_DATE_LABEL, EVENT_TIME_LABEL, GATES_OPEN_LABEL, formatEventTime } from "./event";
+import { formatINR } from "./utils";
+import { passLinks } from "./links";
+import { googleCalendarUrl } from "./ics";
+import { renderPassPdf } from "./pdf";
+import { signBookingId } from "./signing";
+import type { Booking, TicketType } from "./types";
+
+let resend: Resend | null = null;
+function client() {
+  if (!resend) resend = new Resend(env.resendApiKey);
+  return resend;
+}
+
+/**
+ * Sends the pass email with PDF attached. Idempotency is enforced upstream
+ * (only called when confirm_booking transitioned, or on explicit resend).
+ */
+export async function sendPassEmail(booking: Booking, tier: TicketType) {
+  const links = passLinks(booking);
+  const qrPayload = signBookingId(booking.id);
+  const qrImageUrl = `${env.siteUrl}/api/pass/${booking.id}/qr.png?t=${links.token}`;
+  const googleCalUrl = googleCalendarUrl({ bookingId: booking.id, passUrl: links.view });
+
+  const props = {
+    attendeeName: booking.name,
+    bookingId: booking.id,
+    tierName: tier.name,
+    quantity: booking.quantity,
+    attendees: booking.attendees,
+    amountLabel: formatINR(booking.amount_paise),
+    eventName: EVENT.name,
+    eventSubtitle: EVENT.subtitle,
+    organiser: EVENT.organiser,
+    dateLabel: EVENT_DATE_LABEL,
+    timeLabel: EVENT_TIME_LABEL,
+    venueName: EVENT.venue.name,
+    venueAddress: EVENT.venue.address,
+    mapsUrl: EVENT.venue.mapsUrl,
+    qrImageUrl,
+    passUrl: links.view,
+    pdfUrl: links.pdf,
+    icsUrl: links.ics,
+    googleCalUrl,
+    supportEmail: EVENT.contact.email,
+    gatesLabel: GATES_OPEN_LABEL,
+    startLabel: formatEventTime(EVENT.startsAt),
+    ageNote: EVENT.ageNote,
+  };
+
+  const element = React.createElement(PassEmail, props);
+  const [html, text, pdf] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+    renderPassPdf({ booking, tier, qrPayload }),
+  ]);
+
+  const { error } = await client().emails.send({
+    from: env.emailFrom,
+    to: booking.email,
+    replyTo: env.emailReplyTo,
+    subject: `🎟️ You're in! Your ${EVENT.name} pass is here (${booking.id})`,
+    html,
+    text: plainTextFallback(text, props),
+    attachments: [
+      {
+        filename: `GarbaVerse-Pass-${booking.id}.pdf`,
+        content: pdf.toString("base64"),
+        contentType: "application/pdf",
+      },
+    ],
+    headers: {
+      "X-Entity-Ref-ID": booking.id, // stops Gmail threading unrelated passes
+    },
+    tags: [
+      { name: "type", value: "pass" },
+      { name: "tier", value: tier.id },
+    ],
+  });
+
+  if (error) throw new Error(`Resend error: ${error.message}`);
+}
+
+/** Ensures the plain-text part always carries the essentials, even if the renderer trims. */
+function plainTextFallback(
+  rendered: string,
+  p: { bookingId: string; attendeeName: string; tierName: string; passUrl: string; pdfUrl: string }
+) {
+  const essentials = [
+    `${EVENT.name} — ${EVENT.subtitle}`,
+    ``,
+    `You're in, ${p.attendeeName}!`,
+    `Booking ID: ${p.bookingId}`,
+    `Pass: ${p.tierName}`,
+    `When: ${EVENT_DATE_LABEL}, ${EVENT_TIME_LABEL} IST`,
+    `Where: ${EVENT.venue.name}, ${EVENT.venue.address}`,
+    `Map: ${EVENT.venue.mapsUrl}`,
+    ``,
+    `View your pass & QR: ${p.passUrl}`,
+    `Download PDF: ${p.pdfUrl}`,
+    ``,
+    `Show the QR at the gate. One scan per pass. Questions: ${EVENT.contact.email}`,
+  ].join("\n");
+  return rendered && rendered.trim().length > 50 ? rendered : essentials;
+}

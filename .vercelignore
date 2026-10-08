@@ -1,0 +1,9 @@
+# Never upload local secrets or build artefacts to Vercel.
+.env
+.env.*
+!.env.example
+node_modules
+.next
+*.tsbuildinfo
+# Design reference only — not used by the site.
+noir-vineyard-drama-dark-red-wine-color-palette.webp

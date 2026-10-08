@@ -1,0 +1,15 @@
+# Dependencies & build output
+node_modules
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets — NEVER commit. .env.example is the shareable template.
+.env*
+!.env.example
+
+# Local tooling
+.vercel
+.claude
+.DS_Store

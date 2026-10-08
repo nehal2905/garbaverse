@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-ink-950 text-cream antialiased;
+    /* Low, matte wash of oxblood over midnight — atmosphere, not glow. */
+    background-image:
+      radial-gradient(1200px 600px at 50% -10%, rgba(60, 11, 24, 0.55), transparent 65%),
+      radial-gradient(800px 500px at 100% 30%, rgba(60, 11, 24, 0.25), transparent 65%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    @apply bg-brand-500 text-cream;
+  }
+  /* Visible focus for keyboard users — parchment, so it reads on claret buttons too. */
+  :focus-visible {
+    outline: 2px solid theme("colors.cream");
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Accent words in headings: dusty wine, solid — no foil, no shimmer. */
+  .accent-text {
+    @apply text-brand-300;
+  }
+  .glass {
+    @apply border border-cream/[0.07] bg-cream/[0.025] shadow-inset backdrop-blur-xl;
+  }
+  .glass-strong {
+    @apply border border-brand-800 bg-ink-900/80 shadow-card backdrop-blur-2xl;
+  }
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 font-semibold transition-colors duration-200 ease-out active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+  /* Claret fill, parchment label (9:1). Hover deepens to oxblood-claret — no glow. */
+  .btn-primary {
+    @apply btn bg-brand-500 text-cream shadow-soft hover:bg-brand-600;
+  }
+  .btn-ghost {
+    @apply btn border border-cream/15 bg-cream/[0.04] text-cream hover:border-brand-400/50 hover:bg-cream/[0.08];
+  }
+  .btn-outline {
+    @apply btn border border-brand-400/60 text-brand-300 hover:bg-brand-500/20 hover:text-brand-200;
+  }
+  .input {
+    @apply block w-full rounded-2xl border border-cream/15 bg-ink-900/80 px-4 py-3.5 text-base text-cream placeholder:text-cream/35 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/50;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-cream/85;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.3em] text-brand-300;
+  }
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-cream/[0.06];
+  }
+  .perforation {
+    background-image: linear-gradient(to right, rgba(189, 115, 128, 0.45) 50%, transparent 50%);
+    background-size: 14px 2px;
+    background-repeat: repeat-x;
+    background-position: center;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
