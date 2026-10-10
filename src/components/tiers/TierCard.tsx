@@ -23,7 +23,7 @@ interface Props {
 export function TierCard({ tier, selected, onSelect, as = "div", className }: Props) {
   const s = scarcity(tier);
   const soldOut = s.tone === "sold";
-  // Exact per-head price (₹549 / 2 = ₹274.50) — never round in the buyer's disfavour.
+  // Exact per-head price (₹500 / 2 = ₹250) — never round in the buyer's disfavour.
   const perHead = tier.admits > 1 ? formatINR(Math.round(tier.price_paise / tier.admits)) : null;
   const selectable = as === "button";
 
@@ -37,7 +37,6 @@ export function TierCard({ tier, selected, onSelect, as = "div", className }: Pr
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-display text-xl font-semibold text-ink-900">{tier.name}</h3>
-          <p className="mt-0.5 text-sm text-ink-600">{tier.tagline}</p>
         </div>
         {/* Radio affordance only where the card actually is a radio. */}
         {selectable && (
@@ -67,15 +66,6 @@ export function TierCard({ tier, selected, onSelect, as = "div", className }: Pr
           )}
         </p>
       </div>
-
-      <ul className="mt-5 space-y-2 text-sm text-ink-700">
-        {tier.perks.map((p) => (
-          <li key={p} className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" aria-hidden="true" />
-            {p}
-          </li>
-        ))}
-      </ul>
 
       <div className="mt-6 flex items-center justify-between text-xs">
         <span
@@ -137,13 +127,7 @@ export function TierCardSkeleton() {
   return (
     <div className="glass rounded-3xl p-6" aria-hidden="true">
       <div className="skeleton h-6 w-32" />
-      <div className="skeleton mt-2 h-4 w-44" />
       <div className="skeleton mt-6 h-10 w-28" />
-      <div className="mt-6 space-y-2">
-        <div className="skeleton h-4 w-full" />
-        <div className="skeleton h-4 w-5/6" />
-        <div className="skeleton h-4 w-2/3" />
-      </div>
       <div className="skeleton mt-6 h-6 w-28 rounded-full" />
     </div>
   );

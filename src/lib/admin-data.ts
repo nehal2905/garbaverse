@@ -1,6 +1,6 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase";
-import { isSupabaseConfigured } from "./catalog";
+import { isSupabaseConfigured, listedTiers } from "./catalog";
 import {
   adminStatsLocal,
   allBookingsForExportLocal,
@@ -110,7 +110,7 @@ export async function adminStats() {
   if (tierErr) throw tierErr;
   const confirmed = rows.filter((r) => r.status === "confirmed");
   return {
-    tiers: (tiers ?? []) as TicketType[],
+    tiers: listedTiers((tiers ?? []) as TicketType[]),
     revenuePaise: confirmed.reduce((s, r) => s + r.amount_paise, 0),
     confirmedBookings: confirmed.length,
     attendees: confirmed.reduce((s, r) => s + r.attendees, 0),

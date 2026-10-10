@@ -223,7 +223,7 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
               <h2 className="font-display text-base font-semibold text-ink-900">Know before you go</h2>
               <ul className="mt-3 list-disc space-y-1.5 pl-5">
                 <li>
-                  Gates open {GATES_OPEN_LABEL}. Aarti at {formatEventTime(EVENT.startsAt)} sharp.
+                  Each night, gates open {GATES_OPEN_LABEL}. Aarti at {formatEventTime(EVENT.startsAt)} sharp.
                 </li>
                 <li>One scan per pass — everyone on this booking enters together.</li>
                 <li>Screenshots work, but the PDF is safest if signal is weak.</li>

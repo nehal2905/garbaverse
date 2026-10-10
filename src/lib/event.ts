@@ -4,16 +4,17 @@
  */
 export const EVENT = {
   name: "GarbaVerse",
-  subtitle: "Garba & Dandiya Night",
+  subtitle: "Garba & Dandiya Nights",
   organiser: "Student Surge",
   tagline: "Where every twirl tells a story.",
   partner: "DR Photo Studios",
+  partnerLogo: "/art/dr-photo-studios.jpg",
   // ISO strings with explicit IST offset.
   startsAt: "2026-10-17T18:00:00+05:30",
-  endsAt: "2026-10-17T23:00:00+05:30",
+  endsAt: "2026-10-20T23:00:00+05:30",
   gatesOpenAt: "2026-10-17T17:30:00+05:30",
   // Online sales stop here (enforced server-side in POST /api/bookings).
-  salesCloseAt: "2026-10-17T23:00:00+05:30",
+  salesCloseAt: "2026-10-20T23:00:00+05:30",
   timezone: "Asia/Kolkata",
   venue: {
     name: "Gymkhana Cricket Ground",
@@ -69,7 +70,30 @@ export function formatEventTime(iso: string) {
     .replace(/\s*(am|pm)\s*$/i, (_, p: string) => ` ${p.toUpperCase()}`);
 }
 
-export const EVENT_DATE_LABEL = formatEventDate(); // "Saturday, 17 October 2026"
+/** "17–20 October 2026" — opening night through closing night. */
+export function formatEventDateRange() {
+  const startDay = formatEventDate(EVENT.startsAt, {
+    weekday: undefined,
+    day: "numeric",
+    month: undefined,
+    year: undefined,
+  });
+  const endDay = formatEventDate(EVENT.endsAt, {
+    weekday: undefined,
+    day: "numeric",
+    month: undefined,
+    year: undefined,
+  });
+  const monthYear = formatEventDate(EVENT.endsAt, {
+    weekday: undefined,
+    day: undefined,
+    month: "long",
+    year: "numeric",
+  });
+  return `${startDay}–${endDay} ${monthYear}`;
+}
+
+export const EVENT_DATE_LABEL = formatEventDateRange();
 export const EVENT_TIME_LABEL = `${formatEventTime(EVENT.startsAt)} – ${formatEventTime(EVENT.endsAt)}`;
 export const GATES_OPEN_LABEL = formatEventTime(EVENT.gatesOpenAt); // "5:30 PM"
 

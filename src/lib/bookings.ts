@@ -1,7 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase";
 import { generateBookingId, passAccessToken, signBookingId } from "./signing";
-import { isSupabaseConfigured } from "./catalog";
+import { CATALOG, isOnSale, isSupabaseConfigured, listedTiers } from "./catalog";
 import { EVENT } from "./event";
 import { BookingError, type Booking, type PublicBooking, type TicketType } from "./types";
 import {
@@ -33,7 +33,7 @@ const SWEEP_EVERY_MS = 15_000;
 let lastSweep = 0;
 
 export async function getTicketTypes(): Promise<TicketType[]> {
-  if (!isSupabaseConfigured()) return getTicketTypesLocal();
+  if (!isSupabaseConfigured()) return listedTiers(getTicketTypesLocal());
   const db = supabaseAdmin();
   let sweep: PromiseLike<unknown> | null = null;
   if (Date.now() - lastSweep > SWEEP_EVERY_MS) {
@@ -43,12 +43,14 @@ export async function getTicketTypes(): Promise<TicketType[]> {
   const [{ data, error }] = await Promise.all([
     db.from("ticket_availability").select("*").eq("is_active", true).order("sort_order", { ascending: true }),
     sweep,
+    syncCatalogToSupabase(db),
   ]);
   if (error) throw error;
-  return (data ?? []) as TicketType[];
+  return listedTiers((data ?? []) as TicketType[]);
 }
 
 export async function getTicketType(id: string): Promise<TicketType | null> {
+  if (!isOnSale(id)) return null;
   if (!isSupabaseConfigured()) return getTicketTypeLocal(id);
   const { data, error } = await supabaseAdmin()
     .from("ticket_availability")
@@ -56,7 +58,42 @@ export async function getTicketType(id: string): Promise<TicketType | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
-  return (data as TicketType) ?? null;
+  const row = (data as TicketType) ?? null;
+  if (!row) return null;
+  return listedTiers([row])[0] ?? null;
+}
+
+let catalogSync: Promise<void> | null = null;
+
+/** Keep live ticket_types aligned with CATALOG (drop VIP, Couple ₹500). */
+function syncCatalogToSupabase(db: ReturnType<typeof supabaseAdmin>) {
+  if (catalogSync) return catalogSync;
+  catalogSync = (async () => {
+    await db.from("ticket_types").update({ is_active: false }).eq("id", "vip");
+    await Promise.all(
+      CATALOG.map((t) =>
+        db
+          .from("ticket_types")
+          .update({
+            name: t.name,
+            tagline: t.tagline,
+            description: t.description,
+            perks: t.perks,
+            price_paise: t.price_paise,
+            badge: t.badge,
+            admits: t.admits,
+            max_per_order: t.max_per_order,
+            sort_order: t.sort_order,
+            is_active: t.is_active,
+          })
+          .eq("id", t.id)
+      )
+    );
+  })().catch((err) => {
+    catalogSync = null;
+    console.error("[catalog] could not sync ticket types", err);
+  });
+  return catalogSync;
 }
 
 /* ────────────────────────────── Bookings ─────────────────────────────────── */
@@ -103,6 +140,9 @@ interface CreateInput {
 
 /** Creates a pending booking + reserves inventory. Retries on ID collision. */
 export async function createPendingBooking(input: CreateInput): Promise<Booking> {
+  if (!isOnSale(input.ticketTypeId)) {
+    throw new BookingError("TICKET_TYPE_NOT_FOUND", "That pass type no longer exists.");
+  }
   if (!isSupabaseConfigured()) return createPendingBookingLocal(input);
   const db = supabaseAdmin();
   for (let attempt = 0; attempt < 5; attempt++) {

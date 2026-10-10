@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     default: `${EVENT.name} — ${EVENT.subtitle} · ${EVENT_DATE_LABEL}`,
     template: `%s · ${EVENT.name}`,
   },
-  description: `Hyderabad's biggest Garba & Dandiya night. ${EVENT_DATE_LABEL}, ${EVENT.venue.name}, Secunderabad. Passes from ₹299. Dance · Tradition · Togetherness.`,
+  description: `Hyderabad's biggest Garba & Dandiya nights. ${EVENT_DATE_LABEL}, ${EVENT.venue.name}, Secunderabad. Passes from ₹299. Dance · Tradition · Togetherness.`,
   openGraph: {
     type: "website",
     siteName: EVENT.name,

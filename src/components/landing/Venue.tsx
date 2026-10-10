@@ -14,7 +14,7 @@ export function Venue() {
 
           <dl className="mt-8 grid gap-4 sm:grid-cols-2">
             <Info icon={<Clock className="h-5 w-5" />} title="Gates open">
-              {formatEventTime(EVENT.gatesOpenAt)} · Aarti at {formatEventTime(EVENT.startsAt)}
+              Each night {formatEventTime(EVENT.gatesOpenAt)} · Aarti at {formatEventTime(EVENT.startsAt)}
             </Info>
             <Info icon={<TrainFront className="h-5 w-5" />} title="By metro / train">
               Parade Ground metro (Blue line) is a 10-min walk. Secunderabad station is 2 km away.

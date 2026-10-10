@@ -18,7 +18,7 @@ const booking: PublicBooking = {
   email: "ananya@example.com",
   quantity: 1,
   attendees: 2,
-  amount_paise: 54900,
+  amount_paise: 50000,
   ticket_type: { id: "couple", name: "Couple Pass", admits: 2 },
   expires_at: new Date().toISOString(),
   confirmed_at: new Date().toISOString(),
@@ -55,7 +55,7 @@ export default async function Preview({ searchParams }: { searchParams: Promise<
             initialTiers={CATALOG.map((t, i) =>
               i === 1 ? { ...t, available: 12, sold: t.capacity - 12 } : t
             )}
-            initialTierId="vip"
+            initialTierId="couple"
             checkoutReady={missingCheckoutConfig().length === 0}
           />
         )}

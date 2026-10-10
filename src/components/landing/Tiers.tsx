@@ -20,7 +20,7 @@ export function Tiers({ tiers }: { tiers: TicketType[] | null }) {
           <Divider className="mx-auto mt-6 max-w-xs" />
         </div>
 
-        <div className="mt-14 grid gap-6 pt-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14 grid gap-6 pt-3 sm:grid-cols-2 lg:grid-cols-3">
           {tiers
             ? tiers.map((t) => (
                 <Link
@@ -32,7 +32,7 @@ export function Tiers({ tiers }: { tiers: TicketType[] | null }) {
                   <TierCard tier={t} className="h-full group-hover:-translate-y-1" />
                 </Link>
               ))
-            : Array.from({ length: 4 }).map((_, i) => <TierCardSkeleton key={i} />)}
+            : Array.from({ length: 3 }).map((_, i) => <TierCardSkeleton key={i} />)}
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-4">

@@ -44,7 +44,7 @@ export function buildICS(params: { bookingId: string; name: string; passUrl: str
     `Your ${EVENT.name} pass (${params.bookingId}) is confirmed.`,
     `Booked for: ${params.name}`,
     `Show your QR at the gate: ${params.passUrl}`,
-    `Gates open ${GATES_OPEN_LABEL}.`,
+    `Gates open ${GATES_OPEN_LABEL} each night.`,
   ].join("\n");
 
   const lines = [

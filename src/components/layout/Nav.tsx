@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/#passes", label: "Passes" },
-  { href: "/#highlights", label: "Highlights" },
   { href: "/#venue", label: "Venue" },
   { href: "/#faq", label: "FAQ" },
   { href: "/find", label: "Find my booking" },

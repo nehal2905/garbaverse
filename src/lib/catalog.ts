@@ -8,10 +8,9 @@ export const CATALOG: TicketType[] = [
   {
     id: "general",
     name: "General Pass",
-    tagline: "Dance the night away",
-    description:
-      "Full access to the garba ground, live dhol & DJ, and the dandiya arena.",
-    perks: ["Entry for 1", "Dandiya sticks included", "Access to food court", "Free photo booth"],
+    tagline: "",
+    description: "",
+    perks: [],
     price_paise: 29900,
     admits: 1,
     capacity: 1500,
@@ -26,10 +25,10 @@ export const CATALOG: TicketType[] = [
   {
     id: "couple",
     name: "Couple Pass",
-    tagline: "Two hearts, one circle",
-    description: "Everything in General, for two — at a sweeter price.",
-    perks: ["Entry for 2", "Dandiya sticks for both", "Access to food court", "Couple photo print"],
-    price_paise: 54900,
+    tagline: "",
+    description: "",
+    perks: [],
+    price_paise: 50000,
     admits: 2,
     capacity: 300,
     sold: 0,
@@ -41,34 +40,11 @@ export const CATALOG: TicketType[] = [
     available: 300,
   },
   {
-    id: "vip",
-    name: "VIP Pass",
-    tagline: "Front of the circle",
-    description: "Premium front-zone access, lounge seating, and a welcome drink.",
-    perks: [
-      "Entry for 1",
-      "Front-zone wristband",
-      "VIP lounge & seating",
-      "Welcome drink + snacks",
-      "Priority gate",
-    ],
-    price_paise: 79900,
-    admits: 1,
-    capacity: 200,
-    sold: 0,
-    reserved: 0,
-    max_per_order: 6,
-    badge: "Most popular",
-    sort_order: 3,
-    is_active: true,
-    available: 200,
-  },
-  {
     id: "squad",
     name: "Squad Pass",
-    tagline: "Bring the whole gang",
-    description: "Five General entries bundled with a group photo and a reserved meet-up spot.",
-    perks: ["Entry for 5", "Dandiya sticks for all", "Reserved squad spot", "Group photo print"],
+    tagline: "",
+    description: "",
+    perks: [],
     price_paise: 129900,
     admits: 5,
     capacity: 100,
@@ -76,7 +52,7 @@ export const CATALOG: TicketType[] = [
     reserved: 0,
     max_per_order: 3,
     badge: null,
-    sort_order: 4,
+    sort_order: 3,
     is_active: true,
     available: 100,
   },
@@ -86,6 +62,33 @@ export const CATALOG: TicketType[] = [
  * True when real Supabase credentials are present. Accepts both key formats:
  * the legacy service_role JWT ("eyJ…") and the newer secret key ("sb_secret_…").
  */
+/** IDs we still sell. VIP and any retired tier stay out of the shop. */
+export function isOnSale(id: string) {
+  return CATALOG.some((t) => t.id === id && t.is_active);
+}
+
+/** Overlay live availability onto the current catalog (name, price, copy). */
+export function listedTiers(rows: TicketType[]): TicketType[] {
+  const live = new Map(rows.map((t) => [t.id, t]));
+  return CATALOG.filter((t) => t.is_active).map((canonical) => {
+    const row = live.get(canonical.id);
+    if (!row) return canonical;
+    return {
+      ...row,
+      name: canonical.name,
+      tagline: canonical.tagline,
+      description: canonical.description,
+      perks: canonical.perks,
+      price_paise: canonical.price_paise,
+      badge: canonical.badge,
+      admits: canonical.admits,
+      max_per_order: canonical.max_per_order,
+      sort_order: canonical.sort_order,
+      is_active: true,
+    };
+  });
+}
+
 export function isSupabaseConfigured() {
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
   const key = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();

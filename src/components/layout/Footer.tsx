@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Instagram, Mail, MapPin } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { PartnerLogo } from "@/components/ui/PartnerLogo";
 import { EVENT, EVENT_DATE_LABEL } from "@/lib/event";
 
 export function Footer() {
@@ -13,6 +14,15 @@ export function Footer() {
             {EVENT.tagline} {EVENT_DATE_LABEL}. Organised by {EVENT.organiser}
             {EVENT.partner ? ` with ${EVENT.partner}` : ""}.
           </p>
+          {EVENT.partnerLogo && (
+            <div className="mt-5 flex items-center gap-3">
+              <PartnerLogo size="sm" />
+              <p className="text-xs leading-snug text-ink-600">
+                Official photography partner
+                <span className="block font-medium text-ink-800">{EVENT.partner}</span>
+              </p>
+            </div>
+          )}
         </div>
         <div>
           <h3 className="eyebrow mb-4">Quick links</h3>

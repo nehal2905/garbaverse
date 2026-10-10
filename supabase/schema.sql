@@ -345,20 +345,29 @@ grant select on public.ticket_availability to anon, authenticated, service_role;
 insert into public.ticket_types
   (id, name, tagline, description, perks, price_paise, admits, capacity, max_per_order, badge, sort_order)
 values
-  ('general', 'General Pass', 'Dance the night away',
-   'Full access to the garba ground, live dhol & DJ, and the dandiya arena.',
-   array['Entry for 1', 'Dandiya sticks included', 'Access to food court', 'Free photo booth'],
+  ('general', 'General Pass', '',
+   '',
+   array[]::text[],
    29900, 1, 1500, 10, null, 1),
-  ('couple', 'Couple Pass', 'Two hearts, one circle',
-   'Everything in General, for two — at a sweeter price.',
-   array['Entry for 2', 'Dandiya sticks for both', 'Access to food court', 'Couple photo print'],
-   54900, 2, 300, 5, 'Best value', 2),
-  ('vip', 'VIP Pass', 'Front of the circle',
-   'Premium front-zone access, lounge seating, and a welcome drink.',
-   array['Entry for 1', 'Front-zone wristband', 'VIP lounge & seating', 'Welcome drink + snacks', 'Priority gate'],
-   79900, 1, 200, 6, 'Most popular', 3),
-  ('squad', 'Squad Pass', 'Bring the whole gang',
-   'Five General entries bundled with a group photo and a reserved meet-up spot.',
-   array['Entry for 5', 'Dandiya sticks for all', 'Reserved squad spot', 'Group photo print'],
-   129900, 5, 100, 3, null, 4)
+  ('couple', 'Couple Pass', '',
+   '',
+   array[]::text[],
+   50000, 2, 300, 5, 'Best value', 2),
+  ('squad', 'Squad Pass', '',
+   '',
+   array[]::text[],
+   129900, 5, 100, 3, null, 3)
 on conflict (id) do nothing;
+
+update public.ticket_types
+  set is_active = false
+  where id = 'vip';
+
+update public.ticket_types
+  set tagline = '', description = '', perks = array[]::text[],
+      price_paise = 50000, badge = 'Best value', sort_order = 2
+  where id = 'couple';
+
+update public.ticket_types
+  set tagline = '', description = '', perks = array[]::text[]
+  where id in ('general', 'squad');

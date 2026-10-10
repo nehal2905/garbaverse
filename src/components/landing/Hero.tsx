@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, Clock, MapPin, ArrowDown } from "lucide-react";
+import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { EVENT, EVENT_DATE_LABEL, EVENT_TIME_LABEL, formatEventDate } from "@/lib/event";
 import { CornerFlourish, Divider, Mandala } from "@/components/ui/Ornaments";
+import { PartnerLogo } from "@/components/ui/PartnerLogo";
 import { Countdown } from "./Countdown";
 
 const step = (i: number) => ({ animationDelay: `${i * 0.1}s` });
@@ -16,9 +17,15 @@ export function Hero({ fromPrice }: { fromPrice: string }) {
 
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:pt-8">
         <div className="text-center lg:text-left">
-          <p className="eyebrow motion-safe:animate-fade-up" style={step(0)}>
-            {EVENT.partner} × {EVENT.organiser}
-          </p>
+          <div
+            className="flex flex-col items-center gap-3 motion-safe:animate-fade-up lg:flex-row lg:items-center"
+            style={step(0)}
+          >
+            <PartnerLogo size="md" />
+            <p className="eyebrow text-center lg:text-left">
+              {EVENT.partner} × {EVENT.organiser}
+            </p>
+          </div>
 
           <h1
             className="mt-4 font-display text-[2.65rem] font-black leading-[0.9] tracking-wide text-brand-600 motion-safe:animate-fade-up sm:text-7xl md:text-8xl lg:text-[6.6rem]"
@@ -58,8 +65,8 @@ export function Hero({ fromPrice }: { fromPrice: string }) {
             <Link href="/book" className="btn-primary w-full px-8 text-base sm:w-auto">
               Get passes · from {fromPrice}
             </Link>
-            <a href="#highlights" className="btn-ghost w-full sm:w-auto">
-              What to expect <ArrowDown className="h-4 w-4" aria-hidden="true" />
+            <a href="#passes" className="btn-ghost w-full sm:w-auto">
+              See passes
             </a>
           </div>
         </div>
@@ -83,7 +90,7 @@ export function Hero({ fromPrice }: { fromPrice: string }) {
 
             <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
               <p className="max-w-[12rem] font-display text-lg leading-tight text-cream-50 drop-shadow sm:text-xl">
-                {formatEventDate(EVENT.startsAt, { weekday: "long", day: undefined, month: undefined, year: undefined })} night.
+                Four nights.
                 <span className="block text-saffron">The circle opens.</span>
               </p>
               <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-cream-50 shadow-soft">
@@ -103,14 +110,17 @@ export function Hero({ fromPrice }: { fromPrice: string }) {
 }
 
 function DateBadge() {
-  const day = formatEventDate(EVENT.startsAt, { weekday: undefined, day: "numeric", month: undefined, year: undefined });
+  const start = formatEventDate(EVENT.startsAt, { weekday: undefined, day: "numeric", month: undefined, year: undefined });
+  const end = formatEventDate(EVENT.endsAt, { weekday: undefined, day: "numeric", month: undefined, year: undefined });
   const month = formatEventDate(EVENT.startsAt, { weekday: undefined, day: undefined, month: "short", year: undefined });
   return (
     <div
       className="absolute right-3 top-4 flex h-[4.75rem] w-[4.75rem] flex-col items-center justify-center rounded-full bg-brand-500 text-cream-50 shadow-soft ring-4 ring-saffron/55 sm:right-4 sm:top-5 sm:h-24 sm:w-24"
       aria-hidden="true"
     >
-      <span className="font-display text-2xl font-black leading-none sm:text-4xl">{day}</span>
+      <span className="font-display text-xl font-black leading-none sm:text-3xl">
+        {start}–{end}
+      </span>
       <span className="text-[10px] font-bold uppercase tracking-[0.25em] sm:text-xs">{month}</span>
     </div>
   );

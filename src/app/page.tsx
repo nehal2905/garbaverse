@@ -2,12 +2,10 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/landing/Hero";
 import { Marquee } from "@/components/landing/Marquee";
-import { Highlights } from "@/components/landing/Highlights";
 import { Tiers } from "@/components/landing/Tiers";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { Venue } from "@/components/landing/Venue";
 import { FAQ } from "@/components/landing/FAQ";
-import { NightSchedule } from "@/components/landing/NightSchedule";
 import { faqs } from "@/lib/faqs";
 import { getTicketTypes } from "@/lib/bookings";
 import { CATALOG, isSupabaseConfigured } from "@/lib/catalog";
@@ -73,8 +71,6 @@ export default async function LandingPage() {
       <main id="main">
         <Hero fromPrice={formatINR(minPrice)} />
         <Marquee />
-        <Highlights />
-        <NightSchedule />
         <Tiers tiers={tiers} />
         <Testimonials />
         <Venue />
