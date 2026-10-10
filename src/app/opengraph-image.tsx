@@ -18,8 +18,8 @@ export default function OpenGraphImage() {
           alignItems: "center",
           justifyContent: "center",
           background:
-            "radial-gradient(ellipse at top, #3c0b18 0%, #11162a 55%, #0b0f1c 100%)",
-          color: "#f2e8e1",
+            "radial-gradient(ellipse at top, #d4be94 0%, #e6d2ae 55%, #f4e6c6 100%)",
+          color: "#2a2218",
           fontFamily: "Georgia, serif",
           position: "relative",
         }}
@@ -31,10 +31,10 @@ export default function OpenGraphImage() {
             left: 60,
             right: 60,
             height: 4,
-            background: "linear-gradient(90deg, transparent, #7b1024, transparent)",
+            background: "linear-gradient(90deg, transparent, #6e1c2c, transparent)",
           }}
         />
-        <div style={{ fontSize: 22, letterSpacing: 10, color: "#d49aa5", textTransform: "uppercase" }}>
+        <div style={{ fontSize: 22, letterSpacing: 10, color: "#6e1c2c", textTransform: "uppercase" }}>
           {`${EVENT.organiser} presents`}
         </div>
         <div
@@ -43,16 +43,16 @@ export default function OpenGraphImage() {
             fontWeight: 700,
             letterSpacing: 6,
             marginTop: 10,
-            color: "#f2e8e1",
+            color: "#6e1c2c",
           }}
         >
           {EVENT.name}
         </div>
         <div style={{ fontSize: 44, fontStyle: "italic", marginTop: -10 }}>{EVENT.subtitle}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 36, marginTop: 40, fontSize: 28, color: "#a7a3ad" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 36, marginTop: 40, fontSize: 28, color: "#746056" }}>
           <span>{EVENT_DATE_LABEL}</span>
           {/* Drawn, not typed: the bundled OG font has no ✦ or ₹ glyphs. */}
-          <div style={{ width: 12, height: 12, background: "#bd7380", transform: "rotate(45deg)" }} />
+          <div style={{ width: 12, height: 12, background: "#c9a227", transform: "rotate(45deg)" }} />
           <span>{EVENT.venue.name}, Secunderabad</span>
         </div>
         <div
@@ -62,8 +62,8 @@ export default function OpenGraphImage() {
             marginTop: 40,
             padding: "14px 36px",
             borderRadius: 999,
-            background: "#7b1024",
-            color: "#f2e8e1",
+            background: "#8f2438",
+            color: "#f4e6c6",
             fontSize: 28,
             fontWeight: 700,
           }}
@@ -79,7 +79,7 @@ export default function OpenGraphImage() {
             left: 60,
             right: 60,
             height: 4,
-            background: "linear-gradient(90deg, transparent, #7b1024, transparent)",
+            background: "linear-gradient(90deg, transparent, #6e1c2c, transparent)",
           }}
         />
       </div>
@@ -96,7 +96,7 @@ function Rupee() {
       height="26"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#f2e8e1"
+      stroke="#f4e6c6"
       strokeWidth="2.6"
       strokeLinecap="round"
       strokeLinejoin="round"

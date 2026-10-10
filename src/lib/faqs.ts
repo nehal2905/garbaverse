@@ -3,7 +3,7 @@ import { EVENT } from "./event";
 export const faqs = [
   {
     q: "How do I get my pass after paying?",
-    a: "Instantly. Your pass with a QR code appears on screen the moment payment is confirmed and is emailed to you with a PDF attached. You can also retrieve it any time from “Find my booking”.",
+    a: "Scan the UPI QR, pay the exact amount, and tap I've paid. We check the transfer and then your pass appears on screen and in your email. You can also retrieve it any time from “Find my booking”.",
   },
   {
     q: "Do I need to print anything?",

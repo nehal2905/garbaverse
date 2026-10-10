@@ -13,8 +13,8 @@ export default async function AdminLoginPage() {
     <main id="main" className="flex min-h-dvh items-center justify-center px-4">
       <div className="glass-strong w-full max-w-sm rounded-3xl p-8">
         <Logo />
-        <h1 className="mt-6 font-display text-2xl font-bold text-cream">Organiser login</h1>
-        <p className="mt-1 text-sm text-cream/60">Bookings, exports and gate check-in.</p>
+        <h1 className="mt-6 font-display text-2xl font-bold text-ink-900">Organiser login</h1>
+        <p className="mt-1 text-sm text-ink-600">Bookings, exports and gate check-in.</p>
         <LoginForm />
       </div>
     </main>

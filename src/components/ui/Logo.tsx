@@ -11,8 +11,8 @@ export function Logo({ className, size = "md" }: { className?: string; size?: "s
       aria-label="GarbaVerse home"
     >
       <Dandiya className="h-7 w-7" />
-      <span className="text-cream">
-        Garba<span className="text-brand-300">Verse</span>
+      <span className="text-brand-600">
+        Garba<span className="font-normal">Verse</span>
       </span>
     </Link>
   );

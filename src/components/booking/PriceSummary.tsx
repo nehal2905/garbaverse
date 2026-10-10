@@ -24,8 +24,8 @@ export function PriceSummary({ tier, quantity, compact }: Props) {
   if (compact) {
     return (
       <div className="flex items-baseline gap-2">
-        <AnimatedAmount value={total} className="font-display text-2xl font-bold text-brand-300" />
-        <span className="text-xs text-cream/55">
+        <AnimatedAmount value={total} className="font-display text-2xl font-bold text-brand-600" />
+        <span className="text-xs text-ink-500">
           {tier ? `${tier.name} × ${quantity}` : "No pass selected"}
         </span>
       </div>
@@ -34,7 +34,7 @@ export function PriceSummary({ tier, quantity, compact }: Props) {
 
   return (
     <div className="glass-strong rounded-3xl p-6">
-      <h2 className="font-display text-lg font-semibold text-cream">Order summary</h2>
+      <h2 className="font-display text-lg font-semibold text-ink-900">Order summary</h2>
       <AnimatePresence mode="wait">
         {tier ? (
           <motion.div
@@ -46,25 +46,25 @@ export function PriceSummary({ tier, quantity, compact }: Props) {
             className="mt-4 space-y-3 text-sm"
           >
             <div className="flex justify-between">
-              <span className="text-cream/70">
-                {tier.name} <span className="text-cream/40">× {quantity}</span>
+              <span className="text-ink-600">
+                {tier.name} <span className="text-ink-400">× {quantity}</span>
               </span>
-              <span className="tabular-nums text-cream">{formatINR(tier.price_paise * quantity)}</span>
+              <span className="tabular-nums text-ink-900">{formatINR(tier.price_paise * quantity)}</span>
             </div>
-            <div className="flex justify-between text-cream/55">
+            <div className="flex justify-between text-ink-500">
               <span className="inline-flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5" aria-hidden="true" /> Admits
               </span>
               <span>{pluralise(people, "person", "people")}</span>
             </div>
-            <div className="flex justify-between text-cream/55">
+            <div className="flex justify-between text-ink-500">
               <span>Taxes &amp; fees</span>
               <span>Included</span>
             </div>
             <div className="perforation my-2 h-px" aria-hidden="true" />
             <div className="flex items-end justify-between">
-              <span className="font-semibold text-cream">Total</span>
-              <AnimatedAmount value={total} className="font-display text-3xl font-bold text-brand-300" />
+              <span className="font-semibold text-ink-900">Total</span>
+              <AnimatedAmount value={total} className="font-display text-3xl font-bold text-brand-600" />
             </div>
           </motion.div>
         ) : (
@@ -73,7 +73,7 @@ export function PriceSummary({ tier, quantity, compact }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="mt-4 text-sm text-cream/55"
+            className="mt-4 text-sm text-ink-500"
           >
             Select a pass to see your total.
           </motion.p>

@@ -10,10 +10,10 @@ export function Tiers({ tiers }: { tiers: TicketType[] | null }) {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Passes</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-cream sm:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink-900 sm:text-5xl">
             Pick your <span className="accent-text">pass</span>
           </h2>
-          <p className="mt-4 text-cream/65">
+          <p className="mt-4 text-ink-600">
             Every pass includes dandiya sticks, food court access and the photo booth. Prices are
             inclusive of all taxes. Numbers below are live.
           </p>
@@ -39,13 +39,13 @@ export function Tiers({ tiers }: { tiers: TicketType[] | null }) {
           <Link href="/book" className="btn-primary px-10">
             <Ticket className="h-4 w-4" aria-hidden="true" /> Book now
           </Link>
-          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-cream/50">
+          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-ink-500">
             <li className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> Secure UPI / card
-              payments via Razorpay
+              <ShieldCheck className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> Pay by UPI · we
+              confirm by hand
             </li>
             <li className="inline-flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> QR pass emailed instantly
+              <Zap className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> QR pass after we confirm
             </li>
           </ul>
         </div>

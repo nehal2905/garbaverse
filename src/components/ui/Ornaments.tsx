@@ -2,7 +2,7 @@ import { useId } from "react";
 import { cn } from "@/lib/utils";
 
 /*
- * Decorative SVG artwork in the Noir Vineyard palette — matte, no glows.
+ * Decorative SVG artwork in the Ivory Invitation palette.
  * Two rules keep these safe to render anywhere:
  *  • Gradient IDs come from useId(). SVG ids are document-global, and a
  *    url(#id) that resolves to a copy inside a display:none parent paints
@@ -11,11 +11,11 @@ import { cn } from "@/lib/utils";
  *    the last float digit, which React reports as a hydration mismatch.
  */
 
-const OXBLOOD = "#3c0b18";
-const CLARET = "#7b1024";
-const ROSE = "#bd7380"; // claret lifted for visibility on midnight
-const PARCHMENT = "#f2e8e1";
-const MIDNIGHT = "#0b0f1c";
+const OXBLOOD = "#521520";
+const CLARET = "#6e1c2c";
+const ROSE = "#a8324c";
+const PARCHMENT = "#e6d2ae";
+const INK = "#2a2218";
 
 /** Round to 2dp: plenty for a 400-unit viewBox, identical on server and client. */
 const r2 = (n: number) => Math.round(n * 100) / 100;
@@ -78,15 +78,15 @@ export function Mandala({ className, spin = true }: { className?: string; spin?:
   );
 }
 
-/** Crossed dandiya sticks glyph — one claret stick, one parchment. */
+/** Crossed dandiya sticks glyph — one burgundy stick, one rose. */
 export function Dandiya({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true" className={className}>
       <g strokeLinecap="round" strokeWidth="5">
-        <line x1="14" y1="50" x2="50" y2="14" stroke={PARCHMENT} />
+        <line x1="14" y1="50" x2="50" y2="14" stroke={CLARET} />
         <line x1="14" y1="14" x2="50" y2="50" stroke={ROSE} />
       </g>
-      <circle cx="32" cy="32" r="4" fill={CLARET} stroke={MIDNIGHT} strokeWidth="1.5" />
+      <circle cx="32" cy="32" r="4" fill={INK} />
     </svg>
   );
 }
@@ -95,9 +95,9 @@ export function Dandiya({ className }: { className?: string }) {
 export function Divider({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-3", className)} aria-hidden="true">
-      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-brand-400/40" />
-      <span className="text-brand-400">✦</span>
-      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-brand-400/40" />
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-brand-600/40" />
+      <span className="text-brand-600">✦</span>
+      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-brand-600/40" />
     </div>
   );
 }
@@ -111,8 +111,8 @@ export function Lantern({
   variant?: "claret" | "oxblood";
 }) {
   const id = `lantern-${useId().replace(/:/g, "")}`;
-  const top = variant === "oxblood" ? "#5e0c1c" : CLARET;
-  const bottom = variant === "oxblood" ? "#24060e" : OXBLOOD;
+  const top = variant === "oxblood" ? "#4a101b" : CLARET;
+  const bottom = variant === "oxblood" ? "#2f0a11" : OXBLOOD;
   return (
     <svg viewBox="0 0 48 88" aria-hidden="true" className={className}>
       <defs>
@@ -121,8 +121,8 @@ export function Lantern({
           <stop offset="1" stopColor={bottom} />
         </linearGradient>
       </defs>
-      <line x1="24" y1="0" x2="24" y2="14" stroke="#2d354e" strokeWidth="1.4" />
-      <rect x="16" y="14" width="16" height="5" rx="1" fill="#181e33" stroke={ROSE} strokeOpacity="0.4" strokeWidth="0.8" />
+      <line x1="24" y1="0" x2="24" y2="14" stroke={ROSE} strokeWidth="1.4" />
+      <rect x="16" y="14" width="16" height="5" rx="1" fill={PARCHMENT} stroke={ROSE} strokeOpacity="0.5" strokeWidth="0.8" />
       <path
         d="M10 22 C10 20 14 19 24 19 C34 19 38 20 38 22 L36 48 C36 56 30 60 24 60 C18 60 12 56 12 48 Z"
         fill={`url(#${id})`}
@@ -134,8 +134,8 @@ export function Lantern({
         strokeWidth="1.2"
         opacity="0.25"
       />
-      <path d="M17 31 V52 M24 29 V56 M31 31 V52" stroke={MIDNIGHT} strokeOpacity="0.35" strokeWidth="1" />
-      <rect x="20" y="60" width="8" height="4" rx="1" fill="#181e33" stroke={ROSE} strokeOpacity="0.4" strokeWidth="0.8" />
+      <path d="M17 31 V52 M24 29 V56 M31 31 V52" stroke={INK} strokeOpacity="0.25" strokeWidth="1" />
+      <rect x="20" y="60" width="8" height="4" rx="1" fill={PARCHMENT} stroke={ROSE} strokeOpacity="0.5" strokeWidth="0.8" />
       <path d="M22 64 L24 76 L26 64" fill={ROSE} opacity="0.7" />
     </svg>
   );
@@ -156,5 +156,30 @@ export function Garland({ className }: { className?: string }) {
         </span>
       ))}
     </div>
+  );
+}
+
+/** Line-art corner flourish — invitation-poster ornament. */
+export function CornerFlourish({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 160 160" fill="none" aria-hidden="true" className={className}>
+      <path
+        d="M12 148 C12 80 80 12 148 12"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
+      <path
+        d="M28 148 C28 96 64 28 148 28"
+        stroke="currentColor"
+        strokeWidth="1"
+        opacity="0.55"
+      />
+      <circle cx="28" cy="132" r="3" fill="currentColor" />
+      <circle cx="44" cy="108" r="2" fill="currentColor" />
+      <circle cx="72" cy="72" r="2.5" fill="currentColor" />
+      <circle cx="108" cy="44" r="2" fill="currentColor" />
+      <path d="M20 120 C28 112 40 118 36 128 C32 122 24 124 20 120Z" fill="currentColor" opacity="0.7" />
+      <path d="M120 20 C128 28 118 40 128 36 C122 32 124 24 120 20Z" fill="currentColor" opacity="0.7" />
+    </svg>
   );
 }

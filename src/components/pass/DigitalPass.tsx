@@ -28,7 +28,7 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
       style={{ transformPerspective: 1200 }}
       className="relative mx-auto w-full max-w-md"
     >
-      <div className="relative overflow-hidden rounded-[28px] border border-brand-500/40 bg-gradient-to-b from-ink-800 via-ink-900 to-ink-950 shadow-card">
+      <div className="relative overflow-hidden rounded-[28px] border border-brand-600/25 bg-gradient-to-b from-cream-50 via-cream-100 to-cream-200 shadow-card">
         {/* artwork */}
         <Mandala spin={false} className="pointer-events-none absolute -right-24 -top-24 w-72 opacity-20" />
         <div className="h-1.5 bg-wine-band" aria-hidden="true" />
@@ -37,11 +37,11 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
         <div className="relative px-6 pt-6">
           <p className="eyebrow">{EVENT.organiser} presents</p>
           <h2 className="mt-1 font-display text-4xl font-black tracking-wide">
-            <span className="text-cream">
-              Garba<span className="text-brand-300">Verse</span>
+            <span className="text-brand-600">
+              Garba<span className="font-normal">Verse</span>
             </span>
           </h2>
-          <p className="font-display text-sm text-cream/80">{EVENT.subtitle}</p>
+          <p className="font-display text-sm text-ink-700">{EVENT.subtitle}</p>
         </div>
 
         {/* Body */}
@@ -53,14 +53,14 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
             <Field label="Pass">
               {booking.ticket_type.name} × {booking.quantity}
               {booking.attendees > 1 && (
-                <span className="ml-1 text-cream/55">· admits {booking.attendees}</span>
+                <span className="ml-1 text-ink-500">· admits {booking.attendees}</span>
               )}
             </Field>
             <Field label="When">
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> {EVENT_DATE_LABEL}
               </span>
-              <span className="mt-0.5 flex items-center gap-1.5 text-cream/70">
+              <span className="mt-0.5 flex items-center gap-1.5 text-ink-600">
                 <Clock className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> {EVENT_TIME_LABEL}
               </span>
             </Field>
@@ -69,14 +69,14 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
                 <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" aria-hidden="true" />
                 <span>
                   {EVENT.venue.name}
-                  <span className="block text-cream/60">{EVENT.venue.shortAddress}</span>
+                  <span className="block text-ink-600">{EVENT.venue.shortAddress}</span>
                 </span>
               </span>
             </Field>
           </dl>
 
           <div className="flex flex-col items-center">
-            <div className="relative rounded-2xl bg-white p-2.5 shadow-[0_0_0_4px_rgba(123,16,36,0.55)]">
+            <div className="relative rounded-2xl bg-white p-2.5 shadow-[0_0_0_4px_rgba(122,29,46,0.35)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={qrSrc}
@@ -87,34 +87,34 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
                 draggable={false}
               />
               {checkedIn && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-ink-950/80">
-                  <span className="rotate-[-12deg] rounded-md border-2 border-brand-400 px-2 py-1 font-display text-sm font-bold uppercase tracking-widest text-brand-300">
+                <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-cream-50/85">
+                  <span className="rotate-[-12deg] rounded-md border-2 border-brand-400 px-2 py-1 font-display text-sm font-bold uppercase tracking-widest text-brand-600">
                     Used
                   </span>
                 </div>
               )}
             </div>
-            <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-cream/55">Scan at gate</p>
+            <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-ink-500">Scan at gate</p>
           </div>
         </div>
 
         {/* Perforation with notches */}
         <div className="relative" aria-hidden="true">
-          <span className="absolute -left-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-ink-950 ring-1 ring-brand-500/40" />
-          <span className="absolute -right-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-ink-950 ring-1 ring-brand-500/40" />
+          <span className="absolute -left-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-cream-100 ring-1 ring-brand-600/20" />
+          <span className="absolute -right-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-cream-100 ring-1 ring-brand-600/20" />
           <div className="perforation mx-8 h-px" />
         </div>
 
         {/* Stub */}
         <div className="relative flex items-end justify-between px-6 pb-6 pt-5">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.25em] text-cream/55">Booking ID</p>
-            <p className="mt-1 font-mono text-2xl font-bold tracking-[0.2em] text-brand-300">{booking.id}</p>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-ink-500">Booking ID</p>
+            <p className="mt-1 font-mono text-2xl font-bold tracking-[0.2em] text-brand-600">{booking.id}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-cream/55">Paid</p>
-            <p className="mt-1 font-display text-xl font-bold text-brand-300">{formatINR(booking.amount_paise)}</p>
-            <span className="mt-1.5 inline-block rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-cream">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-ink-500">Paid</p>
+            <p className="mt-1 font-display text-xl font-bold text-brand-600">{formatINR(booking.amount_paise)}</p>
+            <span className="mt-1.5 inline-block rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-cream-50">
               {checkedIn ? "Checked in" : "Confirmed"}
             </span>
           </div>
@@ -128,16 +128,16 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[10px] uppercase tracking-[0.25em] text-cream/50">{label}</dt>
-      <dd className="mt-0.5 text-cream">{children}</dd>
+      <dt className="text-[10px] uppercase tracking-[0.25em] text-ink-500">{label}</dt>
+      <dd className="mt-0.5 text-ink-900">{children}</dd>
     </div>
   );
 }
 
 export function PassSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-ink-900/60" aria-hidden="true">
-      <div className="h-1.5 bg-white/10" />
+    <div className="mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-brand-700/10 bg-cream-50" aria-hidden="true">
+      <div className="h-1.5 bg-brand-700/10" />
       <div className="px-6 pt-6">
         <div className="skeleton h-3 w-32" />
         <div className="skeleton mt-3 h-9 w-48" />
@@ -152,7 +152,7 @@ export function PassSkeleton() {
         </div>
         <div className="skeleton h-[156px] w-[156px] rounded-2xl" />
       </div>
-      <div className="mx-8 h-px bg-white/10" />
+      <div className="mx-8 h-px bg-brand-700/10" />
       <div className="flex justify-between px-6 pb-6 pt-5">
         <div className="skeleton h-8 w-36" />
         <div className="skeleton h-8 w-20" />

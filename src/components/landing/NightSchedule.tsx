@@ -17,7 +17,7 @@ export function NightSchedule() {
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <div className="text-center">
           <p className="eyebrow">The night, beat by beat</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-cream sm:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink-900 sm:text-5xl">
             Five hours. <span className="accent-text">No encore needed.</span>
           </h2>
           <Divider className="mx-auto mt-6 max-w-xs" />
@@ -33,9 +33,9 @@ export function NightSchedule() {
               transition={{ delay: i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="glass relative rounded-3xl p-4 text-center sm:p-5"
             >
-              <span className="font-display text-sm font-semibold text-brand-300">{b.time}</span>
-              <h3 className="mt-2 font-display text-lg font-semibold text-cream">{b.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-cream/65">{b.text}</p>
+              <span className="font-display text-sm font-semibold text-brand-600">{b.time}</span>
+              <h3 className="mt-2 font-display text-lg font-semibold text-ink-900">{b.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{b.text}</p>
             </motion.li>
           ))}
         </ol>

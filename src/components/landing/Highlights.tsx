@@ -33,7 +33,7 @@ const items = [
   {
     icon: Camera,
     title: "Photo booth & reels wall",
-    text: "A lit mandala backdrop and a 360° booth. Free prints for Couple & Squad passes.",
+    text: "Shot by DR Photo Studios — a mandala backdrop and 360° booth. Free prints for Couple & Squad passes.",
   },
 ];
 
@@ -43,7 +43,7 @@ export function Highlights() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">What to expect</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-cream sm:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink-900 sm:text-5xl">
             Five hours. One circle. <span className="accent-text">Zero</span> standing still.
           </h2>
           <Divider className="mx-auto mt-6 max-w-xs" />
@@ -60,11 +60,11 @@ export function Highlights() {
               className="glass group relative overflow-hidden rounded-3xl p-6 transition-colors hover:border-brand-500/40"
             >
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-500/10 blur-2xl transition-opacity group-hover:opacity-100 sm:opacity-0" />
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500/25 to-brand-900/40 text-brand-300 ring-1 ring-brand-500/30">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700 ring-1 ring-brand-600/20">
                 <it.icon className="h-6 w-6" aria-hidden="true" />
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold text-cream">{it.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-cream/65">{it.text}</p>
+              <h3 className="mt-5 font-display text-lg font-semibold text-ink-900">{it.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-600">{it.text}</p>
             </motion.li>
           ))}
         </ul>

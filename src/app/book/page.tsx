@@ -9,7 +9,7 @@ import type { TicketType } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Book passes",
-  description: "Choose your pass, enter your details, pay securely. Your QR pass arrives instantly.",
+  description: "Choose your pass, pay by UPI, and get your QR after we confirm the transfer.",
 };
 export const dynamic = "force-dynamic";
 
@@ -74,8 +74,8 @@ export default async function BookPage({
 function Notice({ title, body, href, cta }: { title: string; body: string; href: string; cta: string }) {
   return (
     <div className="mx-auto max-w-lg px-4 pt-40 text-center">
-      <h1 className="font-display text-3xl text-cream">{title}</h1>
-      <p className="mt-3 text-cream/65">{body}</p>
+      <h1 className="font-display text-3xl text-ink-900">{title}</h1>
+      <p className="mt-3 text-ink-600">{body}</p>
       <Link href={href} className="btn-primary mt-6">
         {cta}
       </Link>

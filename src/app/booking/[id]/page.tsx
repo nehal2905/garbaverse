@@ -41,8 +41,8 @@ export default async function BookingPage({
           />
         ) : (
           <div className="mx-auto max-w-md px-4 pt-40 text-center">
-            <h1 className="font-display text-3xl font-bold text-cream">This link isn&apos;t valid</h1>
-            <p className="mt-3 text-cream/65">
+            <h1 className="font-display text-3xl font-bold text-ink-900">This link isn&apos;t valid</h1>
+            <p className="mt-3 text-ink-600">
               To protect your pass, we need to verify it&apos;s you. Look it up with the email you booked with.
             </p>
             <Link href={`/find?id=${id}`} className="btn-primary mt-6">

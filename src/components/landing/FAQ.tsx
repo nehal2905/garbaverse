@@ -13,7 +13,7 @@ export function FAQ() {
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <div className="text-center">
           <p className="eyebrow">FAQ</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-cream sm:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink-900 sm:text-5xl">
             Good to <span className="accent-text">know</span>
           </h2>
         </div>
@@ -31,7 +31,7 @@ export function FAQ() {
                     aria-controls={`${id}-panel`}
                     id={`${id}-button`}
                     onClick={() => setOpen(isOpen ? null : i)}
-                    className="flex w-full items-center justify-between gap-4 rounded-2xl px-5 py-4 text-left font-semibold text-cream"
+                    className="flex w-full items-center justify-between gap-4 rounded-2xl px-5 py-4 text-left font-semibold text-ink-900"
                   >
                     {f.q}
                     <ChevronDown
@@ -52,7 +52,7 @@ export function FAQ() {
                       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="px-5 pb-5 text-[15px] leading-relaxed text-cream/70">{f.a}</p>
+                      <p className="px-5 pb-5 text-[15px] leading-relaxed text-ink-600">{f.a}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

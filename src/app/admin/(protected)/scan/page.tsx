@@ -7,8 +7,8 @@ export default function ScanPage() {
   return (
     <div className="mx-auto max-w-lg">
       <p className="eyebrow">Gate</p>
-      <h1 className="mt-2 font-display text-3xl font-bold text-cream">Check-in scanner</h1>
-      <p className="mt-2 text-sm text-cream/60">
+      <h1 className="mt-2 font-display text-3xl font-bold text-ink-900">Check-in scanner</h1>
+      <p className="mt-2 text-sm text-ink-600">
         Point the camera at a pass QR. Each QR is accepted once; duplicates and unpaid passes are rejected
         with a red screen. You can also type a booking ID.
       </p>

@@ -11,8 +11,8 @@ export default function TermsPage() {
       <Nav />
       <main id="main" className="mx-auto max-w-2xl px-4 pb-20 pt-32 sm:px-6">
         <p className="eyebrow">Legal</p>
-        <h1 className="mt-3 font-display text-4xl font-bold text-cream">Terms, entry rules &amp; refunds</h1>
-        <div className="prose-invert mt-8 space-y-6 text-[15px] leading-relaxed text-cream/75">
+        <h1 className="mt-3 font-display text-4xl font-bold text-ink-900">Terms, entry rules &amp; refunds</h1>
+        <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-ink-700">
           <Section title="1. The event">
             {EVENT.name} ({EVENT.subtitle}) takes place on {EVENT_DATE_LABEL} at {EVENT.venue.name},{" "}
             {EVENT.venue.address}, organised by {EVENT.organiser}.
@@ -24,9 +24,10 @@ export default function TermsPage() {
             be resold.
           </Section>
           <Section title="3. Payments">
-            All prices are in Indian Rupees and include applicable taxes. Payments are processed by
-            Razorpay; we do not store card or bank details. A booking is confirmed only after payment is
-            captured. Unpaid holds are released after {EVENT.holdMinutes} minutes.
+            All prices are in Indian Rupees and include applicable taxes. You pay the organiser directly
+            by UPI (scan the QR shown at checkout). A booking is confirmed only after we verify the
+            transfer. Unpaid holds are released after {EVENT.holdMinutes} minutes. If you have already
+            paid, we keep the hold while we check.
           </Section>
           <Section title="4. Refunds & cancellations">
             Passes are non-refundable except where the organiser cancels the event, in which case the full
@@ -64,7 +65,7 @@ export default function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="font-display text-lg font-semibold text-cream">{title}</h2>
+      <h2 className="font-display text-lg font-semibold text-ink-900">{title}</h2>
       <p className="mt-2">{children}</p>
     </section>
   );

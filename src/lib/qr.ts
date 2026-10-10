@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 const OPTS = {
   errorCorrectionLevel: "M" as const,
   margin: 1,
-  color: { dark: "#0b0f1c", light: "#ffffff" },
+  color: { dark: "#2a1a14", light: "#ffffff" },
 };
 
 export async function qrDataUrl(payload: string, width = 512) {

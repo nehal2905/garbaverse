@@ -13,7 +13,7 @@ export function LogoutButton() {
         router.replace("/admin/login");
         router.refresh();
       }}
-      className="inline-flex items-center gap-1.5 text-sm text-cream/60 hover:text-brand-300"
+      className="inline-flex items-center gap-1.5 text-sm text-ink-600 hover:text-brand-700"
     >
       <LogOut className="h-4 w-4" aria-hidden="true" /> Sign out
     </button>

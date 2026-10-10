@@ -1,25 +1,25 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase";
 import { generateBookingId, passAccessToken, signBookingId } from "./signing";
-import { CATALOG, isSupabaseConfigured } from "./catalog";
+import { isSupabaseConfigured } from "./catalog";
 import { EVENT } from "./event";
-import type { Booking, PublicBooking, TicketType } from "./types";
+import { BookingError, type Booking, type PublicBooking, type TicketType } from "./types";
+import {
+  claimEmailSendLocal,
+  confirmBookingLocal,
+  createPendingBookingLocal,
+  declarePaidLocal,
+  expireBookingsLocal,
+  getBookingLocal,
+  getTicketTypeLocal,
+  getTicketTypesLocal,
+  listUnsentConfirmedLocal,
+  lookupBookingLocal,
+  releaseBookingLocal,
+  unclaimEmailSendLocal,
+} from "./local-store";
 
-export class BookingError extends Error {
-  constructor(
-    public code:
-      | "SOLD_OUT"
-      | "TICKET_TYPE_NOT_FOUND"
-      | "QUANTITY_EXCEEDS_LIMIT"
-      | "INVALID_QUANTITY"
-      | "BOOKING_NOT_FOUND"
-      | "UNKNOWN",
-    message: string,
-    public available?: number
-  ) {
-    super(message);
-  }
-}
+export { BookingError };
 
 /* ────────────────────────────── Ticket types ────────────────────────────── */
 
@@ -33,7 +33,7 @@ const SWEEP_EVERY_MS = 15_000;
 let lastSweep = 0;
 
 export async function getTicketTypes(): Promise<TicketType[]> {
-  if (!isSupabaseConfigured()) return CATALOG;
+  if (!isSupabaseConfigured()) return getTicketTypesLocal();
   const db = supabaseAdmin();
   let sweep: PromiseLike<unknown> | null = null;
   if (Date.now() - lastSweep > SWEEP_EVERY_MS) {
@@ -49,6 +49,7 @@ export async function getTicketTypes(): Promise<TicketType[]> {
 }
 
 export async function getTicketType(id: string): Promise<TicketType | null> {
+  if (!isSupabaseConfigured()) return getTicketTypeLocal(id);
   const { data, error } = await supabaseAdmin()
     .from("ticket_availability")
     .select("*")
@@ -61,6 +62,7 @@ export async function getTicketType(id: string): Promise<TicketType | null> {
 /* ────────────────────────────── Bookings ─────────────────────────────────── */
 
 export async function getBooking(id: string): Promise<Booking | null> {
+  if (!isSupabaseConfigured()) return getBookingLocal(id);
   const { data, error } = await supabaseAdmin()
     .from("bookings")
     .select("*")
@@ -71,6 +73,7 @@ export async function getBooking(id: string): Promise<Booking | null> {
 }
 
 export async function getBookingByOrderId(orderId: string): Promise<Booking | null> {
+  if (!isSupabaseConfigured()) return null;
   const { data, error } = await supabaseAdmin()
     .from("bookings")
     .select("*")
@@ -100,6 +103,7 @@ interface CreateInput {
 
 /** Creates a pending booking + reserves inventory. Retries on ID collision. */
 export async function createPendingBooking(input: CreateInput): Promise<Booking> {
+  if (!isSupabaseConfigured()) return createPendingBookingLocal(input);
   const db = supabaseAdmin();
   for (let attempt = 0; attempt < 5; attempt++) {
     const id = generateBookingId();
@@ -138,6 +142,7 @@ export async function createPendingBooking(input: CreateInput): Promise<Booking>
 }
 
 export async function attachOrderId(bookingId: string, orderId: string) {
+  if (!isSupabaseConfigured()) return;
   const { error } = await supabaseAdmin()
     .from("bookings")
     .update({ razorpay_order_id: orderId })
@@ -145,7 +150,37 @@ export async function attachOrderId(bookingId: string, orderId: string) {
   if (error) throw error;
 }
 
+/** Buyer says they paid via UPI. Extends the hold so admin can review. */
+export async function declarePaid(id: string, ref?: string): Promise<Booking> {
+  if (!isSupabaseConfigured()) return declarePaidLocal(id, ref);
+  const booking = await getBooking(id);
+  if (!booking) throw new BookingError("BOOKING_NOT_FOUND", "Booking not found.");
+  if (booking.status !== "pending") return booking;
+  const trimmed = ref?.trim() || null;
+  const expires = new Date(Date.now() + EVENT.reviewHours * 3600_000).toISOString();
+  const patch: Record<string, string | null> = {
+    payment_method: "upi",
+    expires_at: expires,
+  };
+  if (trimmed) patch.razorpay_payment_id = trimmed;
+  const { data, error } = await supabaseAdmin()
+    .from("bookings")
+    .update(patch)
+    .eq("id", id)
+    .eq("status", "pending")
+    .select("*")
+    .maybeSingle();
+  if (error) {
+    if (error.code === "23505") {
+      throw new BookingError("UNKNOWN", "That UPI reference is already on another booking.");
+    }
+    throw error;
+  }
+  return (data as Booking) ?? booking;
+}
+
 export async function releaseBooking(id: string, reason: string) {
+  if (!isSupabaseConfigured()) return releaseBookingLocal(id, reason);
   const { data, error } = await supabaseAdmin().rpc("release_booking", {
     p_id: id,
     p_reason: reason,
@@ -163,6 +198,7 @@ export async function confirmBooking(
   paymentId: string,
   method?: string | null
 ): Promise<{ transitioned: boolean; booking: Booking }> {
+  if (!isSupabaseConfigured()) return confirmBookingLocal(id, paymentId, method);
   const { data, error } = await supabaseAdmin().rpc("confirm_booking", {
     p_id: id,
     p_payment_id: paymentId,
@@ -185,6 +221,7 @@ export async function confirmBooking(
  * one caller even if webhook + browser verify race each other.
  */
 export async function claimEmailSend(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) return claimEmailSendLocal(id);
   const { data, error } = await supabaseAdmin()
     .from("bookings")
     .update({ email_sent_at: new Date().toISOString() })
@@ -198,17 +235,20 @@ export async function claimEmailSend(id: string): Promise<boolean> {
 
 /** Undo a claim when sending failed so a later retry can pick it up. */
 export async function unclaimEmailSend(id: string) {
+  if (!isSupabaseConfigured()) return unclaimEmailSendLocal(id);
   const { error } = await supabaseAdmin().from("bookings").update({ email_sent_at: null }).eq("id", id);
   if (error) throw error;
 }
 
 export async function expireBookings(): Promise<number> {
+  if (!isSupabaseConfigured()) return expireBookingsLocal();
   const { data, error } = await supabaseAdmin().rpc("expire_bookings");
   if (error) throw error;
   return Number(data ?? 0);
 }
 
 export async function lookupBooking(id: string, email: string): Promise<Booking | null> {
+  if (!isSupabaseConfigured()) return lookupBookingLocal(id, email);
   // Exact match only. create_booking stores emails lower-cased; ilike would
   // treat "_" / "%" in user input as wildcards and leak other people's passes.
   const { data, error } = await supabaseAdmin()
@@ -227,6 +267,7 @@ export async function lookupBooking(id: string, email: string): Promise<Booking 
  * path time to send first.
  */
 export async function listUnsentConfirmed(olderThanMs = 2 * 60_000, limit = 25): Promise<Booking[]> {
+  if (!isSupabaseConfigured()) return listUnsentConfirmedLocal(olderThanMs, limit);
   const cutoff = new Date(Date.now() - olderThanMs).toISOString();
   const { data, error } = await supabaseAdmin()
     .from("bookings")
@@ -258,5 +299,6 @@ export function toPublicBooking(b: Booking, tier: TicketType): PublicBooking {
     checked_in_at: b.checked_in_at,
     qr_payload: confirmed ? signBookingId(b.id) : null,
     access_token: passAccessToken(b.id, b.email),
+    payment_method: b.payment_method,
   };
 }

@@ -5,7 +5,9 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarPlus, Download, Loader2, MailCheck, MapPin, Share2, XCircle } from "lucide-react";
 import { DigitalPass, PassSkeleton } from "./DigitalPass";
+import { PayQr } from "@/components/booking/PayQr";
 import { EVENT, GATES_OPEN_LABEL, formatEventTime } from "@/lib/event";
+import { formatINR } from "@/lib/utils";
 import type { PublicBooking } from "@/lib/types";
 
 interface Props {
@@ -27,6 +29,7 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
   const startedAt = useRef(Date.now());
   const [slow, setSlow] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [declaring, setDeclaring] = useState(false);
 
   const poll = useCallback(async () => {
     try {
@@ -59,7 +62,7 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
     setCelebrated(true);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     import("canvas-confetti").then(({ default: confetti }) => {
-      const colors = ["#7b1024", "#3c0b18", "#f2e8e1", "#d49aa5", "#5e0c1c"];
+      const colors = ["#8f2438", "#c9962a", "#f4e6c6", "#a8324c", "#6e1c2c"];
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, colors, scalar: 0.9 });
       setTimeout(
         () => confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0 }, colors }),
@@ -101,22 +104,56 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
         {booking.status === "pending" && (
           <motion.div key="pending" exit={{ opacity: 0, y: -20 }} className="text-center">
             <div role="status" aria-live="polite" className="mx-auto max-w-md">
-              <Loader2 className="mx-auto h-10 w-10 animate-spin text-brand-400" aria-hidden="true" />
-              <h1 className="mt-5 font-display text-3xl font-bold text-cream">Confirming your payment…</h1>
-              <p className="mt-3 text-cream/65">
-                Hang tight — we&apos;re waiting for the bank to confirm. This usually takes a few seconds.
-              </p>
-              {slow && (
-                <p className="mt-3 rounded-2xl border border-brand-500/30 bg-brand-500/10 px-4 py-3 text-sm text-brand-300">
-                  Taking longer than usual. Don&apos;t pay again — if money left your account, your pass
-                  will appear here and in your email automatically. You can safely close this page.
-                </p>
+              {booking.payment_method ? (
+                <>
+                  <Loader2 className="mx-auto h-10 w-10 animate-spin text-brand-400" aria-hidden="true" />
+                  <h1 className="mt-5 font-display text-3xl font-bold text-ink-900">We&apos;re checking your payment</h1>
+                  <p className="mt-3 text-ink-600">
+                    Thank you. Once we find your {formatINR(booking.amount_paise)} UPI transfer, your pass appears
+                    here and in your email. Don&apos;t pay again.
+                  </p>
+                  {slow && (
+                    <p className="mt-3 rounded-2xl border border-brand-500/30 bg-brand-500/10 px-4 py-3 text-sm text-brand-600">
+                      Still reviewing — you can close this page. We&apos;ll email {booking.email} when the pass is ready.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <h1 className="font-display text-3xl font-bold text-ink-900">Finish paying</h1>
+                  <p className="mt-3 text-ink-600">
+                    Scan the QR, pay the exact amount, then wait here. Your spots are held until{" "}
+                    {new Date(booking.expires_at).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })}.
+                  </p>
+                  <div className="glass-strong mt-8 rounded-3xl p-6 text-left">
+                    <PayQr amountPaise={booking.amount_paise} bookingId={booking.id} />
+                    <button
+                      type="button"
+                      className="btn-primary mt-6 w-full"
+                      disabled={declaring}
+                      onClick={async () => {
+                        setDeclaring(true);
+                        await fetch(`/api/bookings/${booking.id}/paid`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ accessToken: token }),
+                        }).catch(() => null);
+                        await poll();
+                        setDeclaring(false);
+                      }}
+                    >
+                      {declaring ? "Saving…" : "I've paid"}
+                    </button>
+                  </div>
+                </>
               )}
             </div>
-            <div className="mt-10">
-              <PassSkeleton />
-            </div>
-            <p className="mt-6 text-xs text-cream/45">Booking ID {booking.id}</p>
+            {booking.payment_method && (
+              <div className="mt-10">
+                <PassSkeleton />
+              </div>
+            )}
+            <p className="mt-6 text-xs text-ink-400">Booking ID {booking.id}</p>
           </motion.div>
         )}
 
@@ -135,7 +172,7 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="mt-3 font-display text-4xl font-black text-cream sm:text-5xl"
+                className="mt-3 font-display text-4xl font-black text-ink-900 sm:text-5xl"
               >
                 You&apos;re in, <span className="accent-text">{booking.name.split(" ")[0]}</span>!
               </motion.h1>
@@ -143,10 +180,10 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 }}
-                className="mx-auto mt-3 flex max-w-md items-center justify-center gap-2 text-sm text-cream/65"
+                className="mx-auto mt-3 flex max-w-md items-center justify-center gap-2 text-sm text-ink-600"
               >
                 <MailCheck className="h-4 w-4 text-brand-400" aria-hidden="true" />
-                Pass emailed to <span className="font-medium text-cream">{booking.email}</span>
+                Pass emailed to <span className="font-medium text-ink-900">{booking.email}</span>
               </motion.p>
             </div>
 
@@ -181,9 +218,9 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="glass mx-auto mt-10 max-w-md rounded-3xl p-6 text-sm text-cream/70"
+              className="glass mx-auto mt-10 max-w-md rounded-3xl p-6 text-sm text-ink-600"
             >
-              <h2 className="font-display text-base font-semibold text-cream">Know before you go</h2>
+              <h2 className="font-display text-base font-semibold text-ink-900">Know before you go</h2>
               <ul className="mt-3 list-disc space-y-1.5 pl-5">
                 <li>
                   Gates open {GATES_OPEN_LABEL}. Aarti at {formatEventTime(EVENT.startsAt)} sharp.
@@ -192,9 +229,9 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
                 <li>Screenshots work, but the PDF is safest if signal is weak.</li>
                 <li>Carry a photo ID. {EVENT.ageNote}</li>
               </ul>
-              <p className="mt-4 text-xs text-cream/45">
+              <p className="mt-4 text-xs text-ink-400">
                 Lost this page? Use{" "}
-                <Link href="/find" className="text-brand-300 underline">
+                <Link href="/find" className="text-brand-600 underline">
                   Find my booking
                 </Link>{" "}
                 with your email and ID <span className="font-mono">{booking.id}</span>.
@@ -207,17 +244,15 @@ export function BookingStatus({ initial, token, googleCalUrl }: Props) {
         {booking.status === "cancelled" && (
           <motion.div key="cancelled" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-md text-center">
             <XCircle className="mx-auto h-12 w-12 text-brand-400" aria-hidden="true" />
-            <h1 className="mt-5 font-display text-3xl font-bold text-cream">This booking wasn&apos;t completed</h1>
-            <p className="mt-3 text-cream/65">
-              Payment didn&apos;t go through or the {EVENT.holdMinutes}-minute hold expired, so the spots
-              were released. If money did leave your account, don&apos;t pay again — your pass is still
-              issued automatically and will appear here and in your email. If it hasn&apos;t arrived
-              within an hour, write to us with the reference below.
+            <h1 className="mt-5 font-display text-3xl font-bold text-ink-900">This booking wasn&apos;t completed</h1>
+            <p className="mt-3 text-ink-600">
+              This hold expired or was cancelled, so the spots were released. If you already paid by
+              UPI, write to us with the booking ID below — we&apos;ll confirm it and send your pass.
             </p>
             <Link href="/book" className="btn-primary mt-8">
               Book again
             </Link>
-            <p className="mt-6 text-xs text-cream/45">
+            <p className="mt-6 text-xs text-ink-400">
               Reference {booking.id} · <a href={`mailto:${EVENT.contact.email}`} className="underline">Need help?</a>
             </p>
           </motion.div>

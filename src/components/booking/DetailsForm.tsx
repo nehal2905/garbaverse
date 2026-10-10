@@ -67,7 +67,7 @@ export function DetailsForm({ value, errors, onChange, onBlurField }: Props) {
 
       <Field id="phone" label="Mobile number" error={errors.phone} hint="For gate support on the day">
         <div className="flex">
-          <span className="inline-flex items-center rounded-l-2xl border border-r-0 border-white/15 bg-white/5 px-3.5 text-sm text-cream/70">
+          <span className="inline-flex items-center rounded-l-2xl border border-r-0 border-brand-700/15 bg-brand-700/5 px-3.5 text-sm text-ink-600">
             +91
           </span>
           <input
@@ -89,7 +89,7 @@ export function DetailsForm({ value, errors, onChange, onBlurField }: Props) {
       </Field>
 
       <div>
-        <label className="flex cursor-pointer items-start gap-3 text-sm text-cream/75">
+        <label className="flex cursor-pointer items-start gap-3 text-sm text-ink-700">
           <input
             type="checkbox"
             name="agree"
@@ -98,11 +98,11 @@ export function DetailsForm({ value, errors, onChange, onBlurField }: Props) {
             onBlur={() => onBlurField("agree")}
             aria-invalid={Boolean(errors.agree)}
             aria-describedby={errors.agree ? "agree-error" : undefined}
-            className="mt-0.5 h-5 w-5 shrink-0 rounded border-white/30 bg-ink-900 text-brand-400 accent-brand-400 focus:ring-brand-400"
+            className="mt-0.5 h-5 w-5 shrink-0 rounded border-brand-700/30 bg-cream-50 text-brand-600 accent-brand-600 focus:ring-brand-600"
           />
           <span>
             I agree to the{" "}
-            <a href="/terms" target="_blank" rel="noopener" className="text-brand-300 underline underline-offset-2">
+            <a href="/terms" target="_blank" rel="noopener" className="text-brand-600 underline underline-offset-2">
               terms, entry rules and no-refund policy
             </a>
             .
@@ -142,7 +142,7 @@ function Field({
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs text-cream/45">
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-ink-400">
           {hint}
         </p>
       ) : null}

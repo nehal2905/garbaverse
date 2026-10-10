@@ -6,13 +6,14 @@ export const EVENT = {
   name: "GarbaVerse",
   subtitle: "Garba & Dandiya Night",
   organiser: "Student Surge",
-  tagline: "Dance · Tradition · Togetherness",
+  tagline: "Where every twirl tells a story.",
+  partner: "DR Photo Studios",
   // ISO strings with explicit IST offset.
-  startsAt: "2026-10-10T18:00:00+05:30",
-  endsAt: "2026-10-10T23:00:00+05:30",
-  gatesOpenAt: "2026-10-10T17:30:00+05:30",
+  startsAt: "2026-10-17T18:00:00+05:30",
+  endsAt: "2026-10-17T23:00:00+05:30",
+  gatesOpenAt: "2026-10-17T17:30:00+05:30",
   // Online sales stop here (enforced server-side in POST /api/bookings).
-  salesCloseAt: "2026-10-10T23:00:00+05:30",
+  salesCloseAt: "2026-10-17T23:00:00+05:30",
   timezone: "Asia/Kolkata",
   venue: {
     name: "Gymkhana Cricket Ground",
@@ -30,7 +31,14 @@ export const EVENT = {
     instagram: "https://instagram.com/studentsurge",
   },
   currency: "INR",
-  holdMinutes: 10,
+  holdMinutes: 30,
+  // How long a "I've paid" booking waits for the organiser to confirm.
+  reviewHours: 48,
+  payment: {
+    // Your UPI ID (or set NEXT_PUBLIC_UPI_ID). Also drop your QR at public/art/pay-qr.png.
+    upiId: "",
+    payeeName: "Student Surge",
+  },
   ageNote: "All ages welcome. Under-12s enter free with a paying adult.",
 } as const;
 
@@ -61,7 +69,7 @@ export function formatEventTime(iso: string) {
     .replace(/\s*(am|pm)\s*$/i, (_, p: string) => ` ${p.toUpperCase()}`);
 }
 
-export const EVENT_DATE_LABEL = formatEventDate(); // "Saturday, 10 October 2026"
+export const EVENT_DATE_LABEL = formatEventDate(); // "Saturday, 17 October 2026"
 export const EVENT_TIME_LABEL = `${formatEventTime(EVENT.startsAt)} – ${formatEventTime(EVENT.endsAt)}`;
 export const GATES_OPEN_LABEL = formatEventTime(EVENT.gatesOpenAt); // "5:30 PM"
 

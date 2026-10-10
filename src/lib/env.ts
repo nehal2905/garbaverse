@@ -34,16 +34,12 @@ const PLACEHOLDER = /x{6,}|replace-with|change-me|^eyJhbGciOi\.\.\.$/i;
  * instead of crashing deep inside a request.
  */
 export function missingCheckoutConfig(): string[] {
-  return [
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "SUPABASE_SERVICE_ROLE_KEY",
-    "NEXT_PUBLIC_RAZORPAY_KEY_ID",
-    "RAZORPAY_KEY_SECRET",
-    "BOOKING_SIGNING_SECRET",
-  ].filter((k) => {
-    const v = process.env[k]?.trim();
-    return !v || PLACEHOLDER.test(v);
-  });
+  // UPI QR checkout works without Razorpay or Supabase (local file store).
+  // Production still needs a signing secret so pass QRs stay stable.
+  const secret = process.env.BOOKING_SIGNING_SECRET?.trim();
+  if (secret && !PLACEHOLDER.test(secret)) return [];
+  if (process.env.NODE_ENV !== "production") return [];
+  return ["BOOKING_SIGNING_SECRET"];
 }
 
 export const env = {
@@ -75,9 +71,17 @@ export const env = {
     return process.env.EMAIL_REPLY_TO ?? "studentsurge@gmail.com";
   },
   get signingSecret() {
+    const v = process.env.BOOKING_SIGNING_SECRET?.trim();
+    if (v && !PLACEHOLDER.test(v)) return v;
+    if (process.env.NODE_ENV !== "production") {
+      return "local-dev-signing-secret-not-for-production";
+    }
     return required("BOOKING_SIGNING_SECRET");
   },
   get adminPassword() {
+    const v = process.env.ADMIN_PASSWORD?.trim();
+    if (v && !PLACEHOLDER.test(v)) return v;
+    if (process.env.NODE_ENV !== "production") return "garbaverse";
     return required("ADMIN_PASSWORD");
   },
   get cronSecret() {

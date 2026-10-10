@@ -24,24 +24,24 @@ export function Testimonials() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Last year</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-cream sm:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink-900 sm:text-5xl">
             3,000 dancers. <span className="accent-text">One</span> circle.
           </h2>
         </div>
         <ul className="mt-12 grid gap-4 md:grid-cols-3">
           {quotes.map((q) => (
             <li key={q.name} className="glass flex flex-col rounded-3xl p-6">
-              <div className="flex gap-0.5 text-brand-400" aria-label="5 out of 5 stars">
+              <div className="flex gap-0.5 text-saffron" aria-label="5 out of 5 stars">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="h-4 w-4 fill-current" aria-hidden="true" />
                 ))}
               </div>
-              <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-cream/85">
+              <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-ink-800">
                 “{q.text}”
               </blockquote>
               <footer className="mt-5 text-sm">
-                <div className="font-semibold text-cream">{q.name}</div>
-                <div className="text-cream/50">{q.role}</div>
+                <div className="font-semibold text-ink-900">{q.name}</div>
+                <div className="text-ink-500">{q.role}</div>
               </footer>
             </li>
           ))}

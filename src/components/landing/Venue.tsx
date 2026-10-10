@@ -7,10 +7,10 @@ export function Venue() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
         <div>
           <p className="eyebrow">Venue</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-cream sm:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink-900 sm:text-5xl">
             {EVENT.venue.name}
           </h2>
-          <p className="mt-4 text-cream/70">{EVENT.venue.address}</p>
+          <p className="mt-4 text-ink-600">{EVENT.venue.address}</p>
 
           <dl className="mt-8 grid gap-4 sm:grid-cols-2">
             <Info icon={<Clock className="h-5 w-5" />} title="Gates open">
@@ -61,8 +61,8 @@ function Info({ icon, title, children }: { icon: React.ReactNode; title: string;
         {icon}
       </span>
       <div>
-        <dt className="font-semibold text-cream">{title}</dt>
-        <dd className="mt-1 text-sm text-cream/65">{children}</dd>
+        <dt className="font-semibold text-ink-900">{title}</dt>
+        <dd className="mt-1 text-sm text-ink-600">{children}</dd>
       </div>
     </div>
   );

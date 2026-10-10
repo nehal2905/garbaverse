@@ -30,21 +30,21 @@ export function TierCard({ tier, selected, onSelect, as = "div", className }: Pr
   const content = (
     <>
       {tier.badge && (
-        <span className="absolute -top-3 left-5 rounded-full bg-brand-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-cream shadow-soft">
+        <span className="absolute -top-3 left-5 rounded-full bg-brand-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-cream-50 shadow-soft">
           {tier.badge}
         </span>
       )}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-display text-xl font-semibold text-cream">{tier.name}</h3>
-          <p className="mt-0.5 text-sm text-cream/60">{tier.tagline}</p>
+          <h3 className="font-display text-xl font-semibold text-ink-900">{tier.name}</h3>
+          <p className="mt-0.5 text-sm text-ink-600">{tier.tagline}</p>
         </div>
         {/* Radio affordance only where the card actually is a radio. */}
         {selectable && (
           <span
             className={cn(
               "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all",
-              selected ? "border-brand-500 bg-brand-500 text-cream" : "border-white/20 text-transparent"
+              selected ? "border-brand-500 bg-brand-600 text-cream-50" : "border-brand-700/20 text-transparent"
             )}
             aria-hidden="true"
           >
@@ -54,13 +54,13 @@ export function TierCard({ tier, selected, onSelect, as = "div", className }: Pr
       </div>
 
       <div className="mt-5">
-        <span className="font-display text-4xl font-bold leading-none text-brand-300">
+        <span className="font-display text-4xl font-bold leading-none text-brand-600">
           {formatINR(tier.price_paise)}
         </span>
-        <p className="mt-1.5 text-sm text-cream/55">
+        <p className="mt-1.5 text-sm text-ink-500">
           {perHead ? (
             <>
-              for {tier.admits} people <span className="text-cream/35">·</span> {perHead} each
+              for {tier.admits} people <span className="text-ink-400">·</span> {perHead} each
             </>
           ) : (
             "per person"
@@ -68,7 +68,7 @@ export function TierCard({ tier, selected, onSelect, as = "div", className }: Pr
         </p>
       </div>
 
-      <ul className="mt-5 space-y-2 text-sm text-cream/75">
+      <ul className="mt-5 space-y-2 text-sm text-ink-700">
         {tier.perks.map((p) => (
           <li key={p} className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" aria-hidden="true" />
@@ -81,8 +81,8 @@ export function TierCard({ tier, selected, onSelect, as = "div", className }: Pr
         <span
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold",
-            s.tone === "sold" && "bg-white/10 text-cream/60",
-            s.tone === "hot" && "bg-brand-500/20 text-brand-300",
+            s.tone === "sold" && "bg-brand-700/10 text-ink-600",
+            s.tone === "hot" && "bg-brand-600/10 text-brand-700",
             s.tone === "warm" && "bg-warn/15 text-warn",
             s.tone === "ok" && "bg-ok/15 text-ok"
           )}
@@ -98,7 +98,7 @@ export function TierCard({ tier, selected, onSelect, as = "div", className }: Pr
           )}
           {s.label}
         </span>
-        <span className="inline-flex items-center gap-1 text-cream/45">
+        <span className="inline-flex items-center gap-1 text-ink-400">
           <Users className="h-3.5 w-3.5" aria-hidden="true" />
           admits {tier.admits}
         </span>

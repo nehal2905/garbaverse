@@ -1,5 +1,13 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase";
+import { isSupabaseConfigured } from "./catalog";
+import {
+  adminStatsLocal,
+  allBookingsForExportLocal,
+  checkInBookingLocal,
+  listBookingsLocal,
+  undoCheckInLocal,
+} from "./local-store";
 import type { Booking, BookingStatus, TicketType } from "./types";
 
 export interface AdminBookingRow extends Booking {
@@ -37,6 +45,7 @@ function searchTerm(q: string) {
 }
 
 export async function listBookings(params: AdminListParams) {
+  if (!isSupabaseConfigured()) return listBookingsLocal(params);
   const page = Math.max(1, Math.floor(params.page ?? 1) || 1);
   const pageSize = Math.min(100, Math.max(10, Math.floor(params.pageSize ?? 25) || 25));
   const from = (page - 1) * pageSize;
@@ -72,6 +81,7 @@ export async function listBookings(params: AdminListParams) {
 
 /** Every booking (all statuses) for the CSV export, oldest first. */
 export async function allBookingsForExport(): Promise<AdminBookingRow[]> {
+  if (!isSupabaseConfigured()) return allBookingsForExportLocal();
   return fetchAll<AdminBookingRow>((from, to) =>
     supabaseAdmin()
       .from("bookings")
@@ -83,6 +93,7 @@ export async function allBookingsForExport(): Promise<AdminBookingRow[]> {
 }
 
 export async function adminStats() {
+  if (!isSupabaseConfigured()) return adminStatsLocal();
   const db = supabaseAdmin();
   type Agg = Pick<Booking, "status" | "amount_paise" | "attendees" | "checked_in_at">;
   const [{ data: tiers, error: tierErr }, rows] = await Promise.all([
@@ -109,6 +120,7 @@ export async function adminStats() {
 }
 
 export async function checkInBooking(id: string, by: string) {
+  if (!isSupabaseConfigured()) return checkInBookingLocal(id, by);
   const { data, error } = await supabaseAdmin().rpc("check_in_booking", { p_id: id, p_by: by });
   if (error) throw error;
   const row = (Array.isArray(data) ? data[0] : data) as {
@@ -119,6 +131,7 @@ export async function checkInBooking(id: string, by: string) {
 }
 
 export async function undoCheckIn(id: string) {
+  if (!isSupabaseConfigured()) return undoCheckInLocal(id);
   const { error } = await supabaseAdmin()
     .from("bookings")
     .update({ checked_in_at: null, checked_in_by: null })

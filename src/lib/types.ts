@@ -1,5 +1,21 @@
 export type BookingStatus = "pending" | "confirmed" | "cancelled";
 
+export class BookingError extends Error {
+  constructor(
+    public code:
+      | "SOLD_OUT"
+      | "TICKET_TYPE_NOT_FOUND"
+      | "QUANTITY_EXCEEDS_LIMIT"
+      | "INVALID_QUANTITY"
+      | "BOOKING_NOT_FOUND"
+      | "UNKNOWN",
+    message: string,
+    public available?: number
+  ) {
+    super(message);
+  }
+}
+
 export interface TicketType {
   id: string;
   name: string;
@@ -58,4 +74,5 @@ export interface PublicBooking {
   checked_in_at: string | null;
   qr_payload: string | null; // signed; only when confirmed
   access_token: string; // proves the holder may view this booking
+  payment_method: string | null;
 }

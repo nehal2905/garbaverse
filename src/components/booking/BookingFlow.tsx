@@ -3,13 +3,13 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Lock, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lock, Loader2, RefreshCw } from "lucide-react";
 import { Progress } from "./Progress";
 import { PriceSummary } from "./PriceSummary";
 import { QuantityStepper } from "./QuantityStepper";
 import { DetailsForm, validateDetails, type Details, type DetailsErrors } from "./DetailsForm";
 import { TierCard } from "@/components/tiers/TierCard";
-import { loadRazorpay, openRazorpay, type RazorpaySuccess } from "./razorpay-client";
+import { PayQr } from "./PayQr";
 import { EVENT, EVENT_DATE_LABEL } from "@/lib/event";
 import { cn, formatINR, normaliseIndianMobile, pluralise } from "@/lib/utils";
 import type { TicketType } from "@/lib/types";
@@ -26,9 +26,6 @@ interface CreateResponse {
   accessToken: string;
   expiresAt: string;
   amountPaise: number;
-  order: { id: string; amount: number; currency: string };
-  keyId: string;
-  prefill: { name: string; email: string; contact: string };
 }
 
 const slide = {
@@ -49,7 +46,9 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
   const [qty, setQty] = useState(1);
   const [details, setDetails] = useState<Details>({ name: "", email: "", phone: "", agree: false });
   const [touched, setTouched] = useState<Partial<Record<keyof Details, boolean>>>({});
-  const [paying, setPaying] = useState<"idle" | "creating" | "checkout" | "verifying">("idle");
+  const [paying, setPaying] = useState<"idle" | "creating" | "declaring">("idle");
+  const [checkout, setCheckout] = useState<CreateResponse | null>(null);
+  const [upiRef, setUpiRef] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -108,33 +107,27 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
   };
 
   /* ───────────────────────── Payment ───────────────────────── */
-  const pay = async () => {
-    if (!tier) return;
+  const startPay = async () => {
+    if (!tier || checkout) return;
     setError(null);
     setPaying("creating");
 
-    let created: CreateResponse;
     try {
-      const [res] = await Promise.all([
-        fetch("/api/bookings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ticketTypeId: tier.id,
-            quantity: qty,
-            name: details.name,
-            email: details.email,
-            phone: details.phone,
-          }),
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ticketTypeId: tier.id,
+          quantity: qty,
+          name: details.name,
+          email: details.email,
+          phone: details.phone,
         }),
-        loadRazorpay(),
-      ]);
-      // A gateway/proxy error page is HTML, not JSON — don't surface a parse error.
+      });
       const body = await res.json().catch(() => ({ error: "Something went wrong. Please try again." }));
       if (!res.ok) {
         if (body.code === "SOLD_OUT") {
           await refreshTiers();
-          // go() clears the error, so navigate first, then explain why.
           go(0);
           setError(
             body.available > 0
@@ -147,76 +140,52 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
         setPaying("idle");
         return;
       }
-      created = body as CreateResponse;
+      setCheckout(body as CreateResponse);
+      setPaying("idle");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error. Please try again.");
       setPaying("idle");
-      return;
     }
+  };
 
-    setPaying("checkout");
-    const successUrl = `/booking/${created.bookingId}?t=${created.accessToken}`;
-
-    const onSuccess = async (r: RazorpaySuccess) => {
-      setPaying("verifying");
-      try {
-        await fetch("/api/payments/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            bookingId: created.bookingId,
-            accessToken: created.accessToken,
-            ...r,
-          }),
-        });
-      } catch {
-        // Webhook will confirm; success page polls regardless.
-      }
-      router.push(successUrl);
-    };
-
-    const onDismiss = async () => {
-      // User closed the modal → release the hold now, unless the server sees a
-      // payment in flight (e.g. a UPI request approved after closing).
-      const r = await fetch(`/api/bookings/${created.bookingId}/cancel?t=${created.accessToken}`, {
+  const declarePaid = async () => {
+    if (!checkout) return;
+    setError(null);
+    setPaying("declaring");
+    try {
+      const res = await fetch(`/api/bookings/${checkout.bookingId}/paid`, {
         method: "POST",
-      })
-        .then((x) => (x.ok ? x.json() : null))
-        .catch(() => null);
-      if (r && (r.paymentInFlight || r.status === "confirmed")) {
-        router.push(successUrl);
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken: checkout.accessToken,
+          ref: upiRef.trim() || undefined,
+        }),
+      });
+      const body = await res.json().catch(() => ({ error: "Could not record payment." }));
+      if (!res.ok) {
+        setError(body.error ?? "Could not record payment. Please try again.");
+        setPaying("idle");
         return;
       }
-      setPaying("idle");
-      setError("Payment was cancelled. Your spots were released — you can try again.");
-      refreshTiers();
-    };
-
-    try {
-      const rzp = openRazorpay({
-        key: created.keyId,
-        amount: created.order.amount,
-        currency: created.order.currency,
-        name: EVENT.name,
-        description: `${tier.name} × ${qty} · ${EVENT_DATE_LABEL}`,
-        image: `${window.location.origin}/icon.svg`,
-        order_id: created.order.id,
-        handler: onSuccess,
-        prefill: created.prefill,
-        notes: { booking_id: created.bookingId },
-        theme: { color: "#7b1024", backdrop_color: "rgba(11,15,28,0.92)" },
-        modal: { ondismiss: onDismiss, confirm_close: true, escape: true },
-        retry: { enabled: true, max_count: 3 },
-        timeout: EVENT.holdMinutes * 60,
-      });
-      rzp.on("payment.failed", (res) => {
-        // Razorpay keeps the modal open for retry; we just surface the reason.
-        setError(`Payment failed: ${res.error.description}. You can retry inside the payment window.`);
-      });
+      router.push(`/booking/${checkout.bookingId}?t=${checkout.accessToken}`);
     } catch (e) {
+      setError(e instanceof Error ? e.message : "Network error. Please try again.");
       setPaying("idle");
-      setError(e instanceof Error ? e.message : "Could not open payment window.");
     }
+  };
+
+  const abandonQr = async () => {
+    if (!checkout) {
+      go(1);
+      return;
+    }
+    await fetch(`/api/bookings/${checkout.bookingId}/cancel?t=${checkout.accessToken}`, {
+      method: "POST",
+    }).catch(() => null);
+    setCheckout(null);
+    setUpiRef("");
+    refreshTiers();
+    go(1);
   };
 
   const total = tier ? tier.price_paise * qty : 0;
@@ -247,7 +216,7 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
                   <button
                     type="button"
                     onClick={refreshTiers}
-                    className="inline-flex items-center gap-1.5 text-xs text-cream/55 hover:text-brand-300"
+                    className="inline-flex items-center gap-1.5 text-xs text-ink-500 hover:text-brand-700"
                     aria-label="Refresh availability"
                   >
                     <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} aria-hidden="true" />
@@ -356,77 +325,110 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 aria-labelledby="step-heading"
               >
-                <StepHeading ref={headingRef} eyebrow="Step 3 of 3" title="Review & pay" />
+                <StepHeading
+                  ref={headingRef}
+                  eyebrow="Step 3 of 3"
+                  title={checkout ? "Scan & pay" : "Review & pay"}
+                />
                 {!checkoutReady && (
                   <div
                     role="status"
                     className="mt-5 rounded-2xl border border-warn/40 bg-warn/10 px-4 py-3 text-sm text-warn"
                   >
-                    Payments aren&apos;t connected on this server yet, so passes can&apos;t be bought here.
-                    Nothing has been charged or saved.
+                    Booking isn&apos;t ready on this server yet. Nothing has been saved.
                   </div>
                 )}
                 <ErrorBanner message={error} />
 
                 <div className="glass-strong mt-6 rounded-3xl p-6 sm:p-8">
-                  <dl className="grid gap-5 sm:grid-cols-2">
-                    <Row label="Pass">
-                      {tier.name} × {qty}
-                      <span className="block text-sm font-normal text-cream/55">
-                        Admits {pluralise(tier.admits * qty, "person", "people")}
-                      </span>
-                    </Row>
-                    <Row label="Name">{details.name}</Row>
-                    <Row label="Email">{details.email}</Row>
-                    <Row label="Mobile">+91 {normaliseIndianMobile(details.phone) ?? details.phone}</Row>
-                    <Row label="Event">
-                      {EVENT_DATE_LABEL}
-                      <span className="block text-sm font-normal text-cream/55">{EVENT.venue.name}</span>
-                    </Row>
-                    <Row label="Total">
-                      <span className="font-display text-2xl text-brand-300">{formatINR(total)}</span>
-                    </Row>
-                  </dl>
+                  {!checkout ? (
+                    <>
+                      <dl className="grid gap-5 sm:grid-cols-2">
+                        <Row label="Pass">
+                          {tier.name} × {qty}
+                          <span className="block text-sm font-normal text-ink-500">
+                            Admits {pluralise(tier.admits * qty, "person", "people")}
+                          </span>
+                        </Row>
+                        <Row label="Name">{details.name}</Row>
+                        <Row label="Email">{details.email}</Row>
+                        <Row label="Mobile">+91 {normaliseIndianMobile(details.phone) ?? details.phone}</Row>
+                        <Row label="Event">
+                          {EVENT_DATE_LABEL}
+                          <span className="block text-sm font-normal text-ink-500">{EVENT.venue.name}</span>
+                        </Row>
+                        <Row label="Total">
+                          <span className="font-display text-2xl text-brand-600">{formatINR(total)}</span>
+                        </Row>
+                      </dl>
 
-                  <p className="mt-6 flex items-start gap-2 text-xs text-cream/55">
-                    <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" aria-hidden="true" />
-                    Your spots are held for {EVENT.holdMinutes} minutes once you tap Pay. Payment is processed by
-                    Razorpay (UPI, cards, net banking, wallets). We never see your card details.
-                  </p>
+                      <p className="mt-6 flex items-start gap-2 text-xs text-ink-500">
+                        <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" aria-hidden="true" />
+                        We&apos;ll hold your spots for {EVENT.holdMinutes} minutes while you pay by UPI. Your pass
+                        is issued after we confirm the payment — usually the same day.
+                      </p>
 
-                  <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-                    <button type="button" onClick={() => go(1)} className="btn-ghost" disabled={paying !== "idle"}>
-                      <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Edit details
-                    </button>
-                    <button
-                      type="button"
-                      onClick={pay}
-                      disabled={paying !== "idle" || !checkoutReady}
-                      className="btn-primary min-w-[220px]"
-                      aria-busy={paying !== "idle"}
-                    >
-                      {paying === "idle" && (
-                        <>
-                          <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Pay {formatINR(total)}
-                        </>
-                      )}
-                      {paying === "creating" && (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Reserving your spots…
-                        </>
-                      )}
-                      {paying === "checkout" && (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Complete payment…
-                        </>
-                      )}
-                      {paying === "verifying" && (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Confirming…
-                        </>
-                      )}
-                    </button>
-                  </div>
+                      <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                        <button type="button" onClick={() => go(1)} className="btn-ghost" disabled={paying !== "idle"}>
+                          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Edit details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={startPay}
+                          disabled={paying !== "idle" || !checkoutReady}
+                          className="btn-primary min-w-[220px]"
+                          aria-busy={paying !== "idle"}
+                        >
+                          {paying === "creating" ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Reserving your spots…
+                            </>
+                          ) : (
+                            <>Show UPI QR · {formatINR(total)}</>
+                          )}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <PayQr amountPaise={checkout.amountPaise} bookingId={checkout.bookingId} />
+                      <label className="label mt-6" htmlFor="upi-ref">
+                        UPI reference <span className="font-normal text-ink-400">(optional)</span>
+                      </label>
+                      <input
+                        id="upi-ref"
+                        className="input"
+                        inputMode="text"
+                        autoComplete="off"
+                        placeholder="12-digit UTR / UPI ref"
+                        value={upiRef}
+                        onChange={(e) => setUpiRef(e.target.value)}
+                      />
+                      <p className="mt-2 text-xs text-ink-500">
+                        Helps us find your payment faster. You can skip this and still tap I&apos;ve paid.
+                      </p>
+                      <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                        <button type="button" onClick={abandonQr} className="btn-ghost" disabled={paying !== "idle"}>
+                          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Edit details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={declarePaid}
+                          disabled={paying !== "idle"}
+                          className="btn-primary min-w-[220px]"
+                          aria-busy={paying !== "idle"}
+                        >
+                          {paying === "declaring" ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Saving…
+                            </>
+                          ) : (
+                            "I've paid"
+                          )}
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.section>
             )}
@@ -456,11 +458,17 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
           {step === 2 && (
             <button
               type="button"
-              onClick={pay}
+              onClick={checkout ? declarePaid : startPay}
               disabled={paying !== "idle" || !checkoutReady}
               className="btn-primary min-h-11 px-5 text-sm"
             >
-              {paying === "idle" ? `Pay ${formatINR(total)}` : <Loader2 className="h-4 w-4 animate-spin" />}
+              {paying !== "idle" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : checkout ? (
+                "I've paid"
+              ) : (
+                `Pay ${formatINR(total)}`
+              )}
             </button>
           )}
         </div>
@@ -483,7 +491,7 @@ const StepHeading = forwardRef<
           id="step-heading"
           ref={ref}
           tabIndex={-1}
-          className="mt-2 font-display text-3xl font-bold text-cream focus:outline-none sm:text-4xl"
+          className="mt-2 font-display text-3xl font-bold text-ink-900 focus:outline-none sm:text-4xl"
         >
           {title}
         </h1>
@@ -496,8 +504,8 @@ const StepHeading = forwardRef<
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs font-semibold uppercase tracking-wider text-cream/45">{label}</dt>
-      <dd className="mt-1 break-words font-semibold text-cream">{children}</dd>
+      <dt className="text-xs font-semibold uppercase tracking-wider text-ink-400">{label}</dt>
+      <dd className="mt-1 break-words font-semibold text-ink-900">{children}</dd>
     </div>
   );
 }

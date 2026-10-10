@@ -26,7 +26,7 @@ export function Nav({ cta = true }: { cta?: boolean }) {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        scrolled ? "glass-strong border-b border-brand-500/15" : "bg-transparent"
+        scrolled ? "glass-strong border-b border-brand-700/10" : "bg-transparent"
       )}
     >
       <nav
@@ -39,7 +39,7 @@ export function Nav({ cta = true }: { cta?: boolean }) {
             <li key={l.href}>
               <Link
                 href={l.href}
-                className="text-sm font-medium text-cream/75 transition-colors hover:text-brand-300"
+                className="text-sm font-medium text-ink-700 transition-colors hover:text-brand-700"
               >
                 {l.label}
               </Link>
@@ -49,7 +49,7 @@ export function Nav({ cta = true }: { cta?: boolean }) {
         <div className="flex items-center gap-2">
           <Link
             href="/find"
-            className="hidden text-sm font-medium text-cream/75 hover:text-brand-300 min-[420px]:inline md:hidden"
+            className="hidden text-sm font-medium text-ink-700 hover:text-brand-700 min-[420px]:inline md:hidden"
           >
             Find booking
           </Link>

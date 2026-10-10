@@ -10,8 +10,8 @@ import { sendPassEmail } from "./email";
 import type { Booking, BookingStatus } from "./types";
 
 /**
- * Single entry point for "payment succeeded". Called by BOTH the webhook and
- * the browser-side verify endpoint. Safe to call any number of times:
+ * Single entry point for "payment succeeded". Called by the admin confirm
+ * path (and leftover verify/webhook routes). Safe to call any number of times:
  *   • confirm_booking is a DB state transition (first call wins)
  *   • the pass email is guarded by an atomic claim on email_sent_at
  *

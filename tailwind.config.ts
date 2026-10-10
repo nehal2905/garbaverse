@@ -1,60 +1,58 @@
 import type { Config } from "tailwindcss";
 
 /**
- * GarbaVerse design tokens — "Noir Vineyard" palette.
- * Canonical colours: midnight #0b0f1c · oxblood #3c0b18 · claret #7b1024 · parchment #f2e8e1.
- * Matte by design: no metallic gradients, no glows, no neon.
- *
- *   ink     midnight blue-blacks (page + surfaces). 950 is the canonical #0b0f1c.
- *   brand   wine. 500 = claret #7b1024, the FILL colour (parchment text on it is
- *           9:1). 800 = oxblood #3c0b18 for depth. Claret itself is only 1.8:1
- *           on midnight, so TEXT accents use 300/400 — the same wine, lifted
- *           to a dusty rose (8.4:1 / 5.5:1).
- *   cream   parchment #f2e8e1, all body text.
- *   danger  form errors — muted terracotta, distinct from the wine accent.
- *   warn    pending / "selling fast" — muted ochre.
- *   ok      available / checked-in — sage.
+ * GarbaVerse tokens — sampled from the collage invitation:
+ * aged newspaper paper, bangle maroon, mustard sari, floral magenta.
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
+        cream: {
+          DEFAULT: "#dcc8a0",
+          50: "#efe0b8",
+          100: "#dcc8a0",
+          200: "#cbb48a",
+          300: "#b49a6e",
+        },
         ink: {
-          950: "#0b0f1c",
-          900: "#11162a",
-          800: "#181e33",
-          700: "#222940",
-          600: "#2d354e",
+          950: "#1c1610",
+          900: "#2a2218",
+          800: "#3d3428",
+          700: "#5a4e3e",
+          600: "#726656",
+          500: "#8c7e6c",
+          400: "#a89884",
+          300: "#c4b49c",
         },
         brand: {
-          100: "#f3e3e6",
-          200: "#e2c0c7",
-          300: "#d49aa5",
-          400: "#bd7380",
-          500: "#7b1024",
-          600: "#5e0c1c",
-          700: "#4a0b1b",
-          800: "#3c0b18",
-          900: "#24060e",
+          100: "#f3e2e6",
+          200: "#e4c0c8",
+          300: "#c45a70",
+          400: "#a8324c",
+          500: "#8f2438",
+          600: "#6e1c2c",
+          700: "#521520",
+          800: "#3a0e16",
+          900: "#24080e",
         },
-        cream: "#f2e8e1",
-        danger: "#d98c5f",
-        warn: "#c9a45c",
-        ok: "#8fae98",
+        saffron: "#c9962a",
+        danger: "#b4532a",
+        warn: "#a67c2d",
+        ok: "#3d7a52",
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       backgroundImage: {
-        // Matte wine band (no highlight stop) for card and pass edges.
-        "wine-band": "linear-gradient(90deg,#3c0b18 0%,#7b1024 50%,#3c0b18 100%)",
+        "wine-band": "linear-gradient(90deg,#6e1c2c 0%,#c9962a 50%,#6e1c2c 100%)",
       },
       boxShadow: {
-        soft: "0 10px 30px -12px rgba(0,0,0,0.7)",
-        card: "0 20px 60px -20px rgba(0,0,0,0.8)",
-        inset: "inset 0 1px 0 0 rgba(242,232,225,0.05)",
+        soft: "0 10px 28px -16px rgba(143, 36, 56, 0.4)",
+        card: "0 22px 50px -20px rgba(42, 34, 24, 0.32)",
+        inset: "inset 0 1px 0 0 rgba(255,246,220,0.65)",
       },
       keyframes: {
         float: {
@@ -68,7 +66,6 @@ const config: Config = {
       },
       animation: {
         float: "float 7s ease-in-out infinite",
-        // CSS (not JS) so above-the-fold content appears before hydration.
         "fade-up": "fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both",
       },
     },

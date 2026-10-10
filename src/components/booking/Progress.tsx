@@ -19,9 +19,9 @@ export function Progress({ step }: { step: number }) {
                 aria-current={active ? "step" : undefined}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-full border text-sm font-bold transition-all duration-300",
-                  done && "border-brand-500 bg-brand-500 text-cream",
-                  active && "border-brand-500 bg-brand-500/15 text-brand-300 shadow-soft",
-                  !done && !active && "border-white/15 text-cream/40"
+                  done && "border-brand-500 bg-brand-600 text-cream-50",
+                  active && "border-brand-500 bg-brand-500/15 text-brand-600 shadow-soft",
+                  !done && !active && "border-brand-700/15 text-ink-400"
                 )}
               >
                 {done ? <Check className="h-4 w-4" strokeWidth={3} aria-hidden="true" /> : i + 1}
@@ -29,7 +29,7 @@ export function Progress({ step }: { step: number }) {
               <span
                 className={cn(
                   "text-xs font-semibold uppercase tracking-wider sm:text-sm",
-                  active ? "text-cream" : done ? "text-brand-300" : "text-cream/40"
+                  active ? "text-ink-900" : done ? "text-brand-600" : "text-ink-400"
                 )}
               >
                 <span className="sr-only">Step {i + 1}: </span>
@@ -38,7 +38,7 @@ export function Progress({ step }: { step: number }) {
               </span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className="relative mx-3 mb-5 h-px flex-1 bg-white/10 sm:mb-0">
+              <div className="relative mx-3 mb-5 h-px flex-1 bg-brand-700/10 sm:mb-0">
                 <motion.div
                   className="absolute inset-y-0 left-0 bg-brand-500"
                   initial={false}

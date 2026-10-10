@@ -196,7 +196,7 @@ export function Scanner() {
     <div className="space-y-5">
       {/* Gate + count */}
       <div className="flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2 text-sm text-cream/70">
+        <label className="flex items-center gap-2 text-sm text-ink-600">
           Gate
           <select value={gate} onChange={(e) => setGate(e.target.value)} className="input w-auto py-2">
             {["Gate 1", "Gate 2", "VIP gate", "Squad gate"].map((g) => (
@@ -204,13 +204,13 @@ export function Scanner() {
             ))}
           </select>
         </label>
-        <div className="text-sm text-cream/60">
-          <span className="font-display text-2xl font-bold text-brand-300">{count}</span> checked in this session
+        <div className="text-sm text-ink-600">
+          <span className="font-display text-2xl font-bold text-brand-600">{count}</span> checked in this session
         </div>
       </div>
 
       {/* Camera */}
-      <div className="relative aspect-square overflow-hidden rounded-3xl border border-white/10 bg-ink-950">
+      <div className="relative aspect-square overflow-hidden rounded-3xl border border-brand-700/10 bg-ink-950">
         <video ref={videoRef} className={cn("h-full w-full object-cover", !cameraOn && "hidden")} muted playsInline />
         <canvas ref={canvasRef} className="hidden" />
         {cameraOn && (
@@ -232,7 +232,7 @@ export function Scanner() {
         )}
         {busy && (
           <div className="absolute right-3 top-3 rounded-full bg-ink-950/80 p-2">
-            <Loader2 className="h-4 w-4 animate-spin text-brand-300" aria-label="Checking…" />
+            <Loader2 className="h-4 w-4 animate-spin text-brand-600" aria-label="Checking…" />
           </div>
         )}
         <style>{`@keyframes scanline { 0%,100% { transform: translateY(0) } 50% { transform: translateY(calc(62vmin - 2px)) } }`}</style>
@@ -253,7 +253,7 @@ export function Scanner() {
         className="flex gap-2"
       >
         <div className="relative flex-1">
-          <Keyboard className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-cream/40" aria-hidden="true" />
+          <Keyboard className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" aria-hidden="true" />
           <input
             aria-label="Booking ID"
             className="input pl-11 font-mono uppercase"
@@ -293,17 +293,17 @@ export function Scanner() {
                   <XCircle className="h-9 w-9 shrink-0 text-brand-400" aria-hidden="true" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="font-display text-2xl font-bold text-cream">{MESSAGES[result.code].title}</div>
+                  <div className="font-display text-2xl font-bold text-ink-900">{MESSAGES[result.code].title}</div>
                   {result.booking ? (
-                    <div className="mt-1 text-sm text-cream/85">
+                    <div className="mt-1 text-sm text-ink-800">
                       <div className="text-lg font-semibold">{result.booking.name}</div>
                       <div>
                         {result.booking.tier} × {result.booking.quantity} ·{" "}
-                        <span className="font-bold text-brand-300">admits {result.booking.attendees}</span>
+                        <span className="font-bold text-brand-600">admits {result.booking.attendees}</span>
                       </div>
-                      <div className="mt-1 font-mono text-xs text-cream/60">{result.booking.id}</div>
+                      <div className="mt-1 font-mono text-xs text-ink-600">{result.booking.id}</div>
                       {result.code === "already_used" && result.booking.checked_in_at && (
-                        <div className="mt-1 text-xs text-brand-300">
+                        <div className="mt-1 text-xs text-brand-600">
                           First scanned{" "}
                           {new Date(result.booking.checked_in_at).toLocaleTimeString("en-IN", {
                             hour: "2-digit",
@@ -313,11 +313,11 @@ export function Scanner() {
                         </div>
                       )}
                       {result.code === "not_confirmed" && (
-                        <div className="mt-1 text-xs text-brand-300">Status: {result.booking.status}. Ask for payment proof.</div>
+                        <div className="mt-1 text-xs text-brand-600">Status: {result.booking.status}. Ask for payment proof.</div>
                       )}
                     </div>
                   ) : (
-                    <p className="mt-1 text-sm text-cream/75">
+                    <p className="mt-1 text-sm text-ink-700">
                       {result.code === "error"
                         ? result.message
                         : result.code === "invalid_signature"
@@ -330,7 +330,7 @@ export function Scanner() {
                   <button
                     type="button"
                     onClick={() => undo(result.booking!.id)}
-                    className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-xs text-cream/70 hover:text-cream"
+                    className="inline-flex items-center gap-1 rounded-full border border-brand-700/15 px-2.5 py-1 text-xs text-ink-600 hover:text-ink-900"
                     title="Undo this check-in"
                   >
                     <RotateCcw className="h-3 w-3" aria-hidden="true" /> Undo

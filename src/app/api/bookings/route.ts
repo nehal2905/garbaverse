@@ -1,15 +1,10 @@
 import { z } from "zod";
-import {
-  BookingError,
-  attachOrderId,
-  createPendingBooking,
-  releaseBooking,
-} from "@/lib/bookings";
-import { createOrder } from "@/lib/razorpay";
+import { BookingError, createPendingBooking } from "@/lib/bookings";
 import { passAccessToken } from "@/lib/signing";
 import { clientIp, fail, json, rateLimit } from "@/lib/http";
-import { env, missingCheckoutConfig } from "@/lib/env";
+import { missingCheckoutConfig } from "@/lib/env";
 import { EVENT, isSalesOpen } from "@/lib/event";
+import { publicPayment } from "@/lib/payment";
 import { normaliseIndianMobile } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -70,10 +65,18 @@ export async function POST(req: Request) {
   const input = parsed.data;
   const phone = `+91${input.phone}`;
 
-  // 1. Pending booking + inventory hold (price computed in Postgres).
-  let booking;
   try {
-    booking = await createPendingBooking({ ...input, phone });
+    const booking = await createPendingBooking({ ...input, phone });
+    const pay = publicPayment();
+    return json({
+      bookingId: booking.id,
+      accessToken: passAccessToken(booking.id, booking.email),
+      expiresAt: booking.expires_at,
+      amountPaise: booking.amount_paise,
+      upiId: pay.upiId,
+      payeeName: pay.payeeName,
+      eventName: EVENT.name,
+    });
   } catch (err) {
     if (err instanceof BookingError) {
       const status = err.code === "SOLD_OUT" ? 409 : 400;
@@ -81,34 +84,5 @@ export async function POST(req: Request) {
     }
     console.error("[bookings:create]", err);
     return fail(500, "Could not start your booking. Please try again.");
-  }
-
-  // 2. Razorpay order with booking ID in metadata.
-  try {
-    const order = await createOrder({
-      amountPaise: booking.amount_paise,
-      bookingId: booking.id,
-      email: booking.email,
-      name: booking.name,
-      ticketTypeId: booking.ticket_type_id,
-      quantity: booking.quantity,
-    });
-    await attachOrderId(booking.id, order.id);
-
-    return json({
-      bookingId: booking.id,
-      accessToken: passAccessToken(booking.id, booking.email),
-      expiresAt: booking.expires_at,
-      amountPaise: booking.amount_paise,
-      order,
-      keyId: env.razorpayKeyId,
-      prefill: { name: booking.name, email: booking.email, contact: phone },
-      eventName: EVENT.name,
-    });
-  } catch (err) {
-    console.error("[bookings:order]", err);
-    // Release the hold so inventory isn't stuck for 10 minutes.
-    await releaseBooking(booking.id, "order_creation_failed").catch(() => undefined);
-    return fail(502, "Payment gateway is unavailable. Please try again in a moment.");
   }
 }

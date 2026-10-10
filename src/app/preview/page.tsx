@@ -25,6 +25,7 @@ const booking: PublicBooking = {
   checked_in_at: null,
   qr_payload: "GV-7K3M9Q.preview",
   access_token: "preview",
+  payment_method: "upi",
 };
 
 const previewQr =
@@ -40,10 +41,10 @@ export default async function Preview({ searchParams }: { searchParams: Promise<
           <div className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
             <div className="text-center">
               <p className="eyebrow">Design preview</p>
-              <h1 className="mt-3 font-display text-4xl font-black text-cream sm:text-5xl">
+              <h1 className="mt-3 font-display text-4xl font-black text-ink-900 sm:text-5xl">
                 You&apos;re in, <span className="accent-text">Ananya</span>!
               </h1>
-              <p className="mt-3 text-sm text-cream/65">Sample pass — not a real booking.</p>
+              <p className="mt-3 text-sm text-ink-600">Sample pass — not a real booking.</p>
             </div>
             <div className="mt-10">
               <DigitalPass booking={booking} qrSrc={previewQr} />

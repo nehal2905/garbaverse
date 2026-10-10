@@ -9,6 +9,9 @@ next-env.d.ts
 .env*
 !.env.example
 
+# Local booking store (used when Supabase isn't configured)
+/data
+
 # Local tooling
 .vercel
 .claude

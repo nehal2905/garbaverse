@@ -47,15 +47,15 @@ export interface PassEmailProps {
   ageNote: string;
 }
 
-// Brand: Noir Vineyard (mirrors tailwind.config.ts tokens). Matte — no metallics.
-const SURFACE = "#11162a"; // ink-900
-const PAGE = "#0b0f1c"; // ink-950 midnight
-const CARD = "#181e33"; // ink-800
-const ACCENT = "#7b1024"; // brand-500 claret — fills only (parchment text on it)
-const ACCENT_TEXT = "#d49aa5"; // brand-300 — text/links on midnight
-const LINE = "#5e0c1c"; // brand-600
-const CREAM = "#f2e8e1"; // parchment
-const MUTED = "#a7a3ad";
+// Brand: Ivory Invitation (mirrors tailwind.config.ts tokens).
+const SURFACE = "#f4e6c6";
+const PAGE = "#e6d2ae";
+const CARD = "#d4be94";
+const ACCENT = "#8f2438";
+const ACCENT_TEXT = "#6e1c2c";
+const LINE = "#521520";
+const CREAM = "#2a2218";
+const MUTED = "#726656";
 
 const font = "'Segoe UI', Helvetica, Arial, sans-serif";
 const serif = "Georgia, 'Times New Roman', serif";
@@ -292,7 +292,7 @@ export default function PassEmail(p: PassEmailProps) {
 
           {/* Footer */}
           <Section style={{ textAlign: "center", padding: "22px 8px 0" }}>
-            <Text style={{ margin: 0, color: "#7d7a86", fontSize: 12, lineHeight: 1.7 }}>
+            <Text style={{ margin: 0, color: MUTED, fontSize: 12, lineHeight: 1.7 }}>
               Questions? Reply to this email or write to{" "}
               <Link href={`mailto:${p.supportEmail}`} style={{ color: ACCENT_TEXT }}>
                 {p.supportEmail}
@@ -352,7 +352,7 @@ PassEmail.PreviewProps = {
   eventName: "GarbaVerse",
   eventSubtitle: "Garba & Dandiya Night",
   organiser: "Student Surge",
-  dateLabel: "Saturday, 10 October 2026",
+  dateLabel: "Saturday, 17 October 2026",
   timeLabel: "6:00 PM – 11:00 PM",
   venueName: "Gymkhana Cricket Ground",
   venueAddress: "Secunderabad, Hyderabad",

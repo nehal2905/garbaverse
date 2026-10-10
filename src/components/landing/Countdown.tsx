@@ -27,7 +27,7 @@ export function Countdown({ target }: { target: string }) {
     return <div className="skeleton mx-auto h-20 w-72" aria-hidden="true" />;
   }
   if (v.over) {
-    return <p className="font-display text-2xl text-brand-300">The circle is open. See you on the floor!</p>;
+    return <p className="font-display text-2xl text-brand-600">The circle is open. See you on the floor!</p>;
   }
 
   return (
@@ -39,10 +39,10 @@ export function Countdown({ target }: { target: string }) {
         ["Secs", v.s],
       ].map(([label, n]) => (
         <div key={label as string} className="glass min-w-[4.25rem] rounded-2xl px-3 py-3 sm:min-w-[5.5rem] sm:py-4">
-          <div className="font-display text-2xl font-bold tabular-nums text-brand-300 sm:text-4xl">
+          <div className="font-display text-2xl font-bold tabular-nums text-brand-600 sm:text-4xl">
             {String(n).padStart(2, "0")}
           </div>
-          <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-cream/55 sm:text-xs">{label}</div>
+          <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-ink-500 sm:text-xs">{label}</div>
         </div>
       ))}
     </div>

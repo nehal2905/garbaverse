@@ -20,14 +20,14 @@ import type { Booking, TicketType } from "./types";
 // addresses). Wrap on whole words only.
 Font.registerHyphenationCallback((word) => [word]);
 
-// Brand: Noir Vineyard (mirrors tailwind.config.ts tokens). Matte — no metallics.
-const SURFACE = "#11162a"; // ink-900
-const PAGE = "#0b0f1c"; // ink-950 midnight
-const ACCENT = "#7b1024"; // brand-500 claret — fills only
-const ACCENT_LIGHT = "#d49aa5"; // brand-300 — accent text on midnight
-const LINE = "#5e0c1c"; // brand-600
-const CREAM = "#f2e8e1"; // parchment
-const MUTED = "#a7a3ad";
+// Brand: Ivory Invitation (mirrors tailwind.config.ts tokens).
+const SURFACE = "#f4e6c6";
+const PAGE = "#e6d2ae";
+const ACCENT = "#8f2438";
+const ACCENT_LIGHT = "#6e1c2c";
+const LINE = "#521520";
+const CREAM = "#2a2218";
+const MUTED = "#726656";
 
 const s = StyleSheet.create({
   page: { backgroundColor: PAGE, padding: 24, fontFamily: "Helvetica" },
@@ -41,7 +41,7 @@ const s = StyleSheet.create({
   header: {
     padding: 28,
     paddingBottom: 22,
-    backgroundColor: "#181e33",
+    backgroundColor: PAGE,
     borderBottom: `1pt solid ${LINE}`,
   },
   kicker: {
@@ -122,10 +122,10 @@ const s = StyleSheet.create({
     marginTop: "auto",
     padding: 20,
     paddingHorizontal: 28,
-    backgroundColor: "#0d1221",
+    backgroundColor: ACCENT_LIGHT,
     borderTop: `1pt solid ${LINE}`,
   },
-  footerText: { color: MUTED, fontSize: 8.5, lineHeight: 1.5 },
+  footerText: { color: SURFACE, fontSize: 8.5, lineHeight: 1.5 },
   amount: { color: ACCENT_LIGHT, fontSize: 16, fontFamily: "Helvetica-Bold" },
 });
 

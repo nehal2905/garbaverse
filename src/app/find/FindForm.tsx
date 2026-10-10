@@ -78,9 +78,9 @@ export function FindForm({ initialId }: { initialId?: string }) {
         {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Search className="h-4 w-4" aria-hidden="true" />}
         {busy ? "Looking…" : "Find my pass"}
       </button>
-      <p className="text-center text-xs text-cream/45">
+      <p className="text-center text-xs text-ink-400">
         Can&apos;t find your ID? Search your inbox for “GarbaVerse”, or email{" "}
-        <a href={`mailto:${EVENT.contact.email}`} className="text-brand-300 underline">
+        <a href={`mailto:${EVENT.contact.email}`} className="text-brand-600 underline">
           {EVENT.contact.email}
         </a>
         .

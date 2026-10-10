@@ -16,10 +16,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex items-center gap-6">
             <Logo size="sm" />
             <nav aria-label="Admin" className="flex items-center gap-1 text-sm">
-              <Link href="/admin" className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-cream/75 hover:bg-white/5 hover:text-brand-300">
+              <Link href="/admin" className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-ink-700 hover:bg-brand-700/5 hover:text-brand-700">
                 <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> Bookings
               </Link>
-              <Link href="/admin/scan" className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-cream/75 hover:bg-white/5 hover:text-brand-300">
+              <Link href="/admin/scan" className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-ink-700 hover:bg-brand-700/5 hover:text-brand-700">
                 <ScanLine className="h-4 w-4" aria-hidden="true" /> Check-in
               </Link>
             </nav>
