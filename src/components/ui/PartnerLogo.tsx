@@ -29,23 +29,15 @@ export function BrandLogo({
   if (!item.src) return null;
   const s = SIZE[size];
   return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center justify-center",
-        brand === "organiser" && "rounded-xl bg-white px-3 py-2 shadow-[0_0_0_1px_rgba(82,21,32,0.08)]",
-        className
-      )}
-    >
-      <span className={cn("relative block", s.box)}>
-        <Image
-          src={item.src}
-          alt={`${item.name} logo`}
-          width={s.img}
-          height={Math.round(s.img / 3.6)}
-          unoptimized
-          className="h-full w-full object-contain object-left"
-        />
-      </span>
+    <span className={cn("relative inline-flex shrink-0 items-center justify-center", s.box, className)}>
+      <Image
+        src={item.src}
+        alt={`${item.name} logo`}
+        width={s.img}
+        height={Math.round(s.img / 3.6)}
+        unoptimized
+        className="h-full w-full object-contain object-left"
+      />
     </span>
   );
 }
