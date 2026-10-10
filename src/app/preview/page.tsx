@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { render } from "@react-email/render";
+import React from "react";
 import { Nav } from "@/components/layout/Nav";
 import { DigitalPass } from "@/components/pass/DigitalPass";
 import { BookingFlow } from "@/components/booking/BookingFlow";
+import PassEmail from "@/emails/PassEmail";
 import { CATALOG } from "@/lib/catalog";
+import { EVENT } from "@/lib/event";
 import { missingCheckoutConfig } from "@/lib/env";
+import { googleCalendarUrl } from "@/lib/ics";
 import type { PublicBooking } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -31,13 +37,72 @@ const booking: PublicBooking = {
 const previewQr =
   "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=GV-7K3M9Q";
 
+async function previewOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "127.0.0.1:3001";
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${host}`;
+}
+
 export default async function Preview({ searchParams }: { searchParams: Promise<{ v?: string }> }) {
   const { v } = await searchParams;
+  const origin = await previewOrigin();
+  const passUrl = `${origin}/preview?v=pass`;
+
+  const emailHtml = await render(
+    React.createElement(PassEmail, {
+      ...PassEmail.PreviewProps,
+      mapsUrl: EVENT.venue.mapsUrl,
+      passUrl,
+      pdfUrl: passUrl,
+      icsUrl: passUrl,
+      googleCalUrl: googleCalendarUrl({ bookingId: booking.id, passUrl }),
+      supportEmail: EVENT.contact.email,
+    })
+  );
+
   return (
     <>
       <Nav cta={false} />
       <main id="main">
-        {v === "pass" ? (
+        {v === "email" ? (
+          <div className="mx-auto max-w-xl px-4 pb-20 pt-28 sm:px-6">
+            <div className="text-center">
+              <p className="eyebrow">Inbox preview</p>
+              <h1 className="mt-3 font-display text-3xl font-black text-ink-900 sm:text-5xl">
+                How the pass email looks
+              </h1>
+              <p className="mt-3 text-sm text-ink-600">
+                Sample only — sent after you confirm a UPI payment. The real email also attaches a PDF.
+              </p>
+            </div>
+            <div className="mt-6 overflow-hidden rounded-2xl border border-brand-700/15 bg-white text-left shadow-card">
+              <dl className="space-y-2 border-b border-brand-700/10 px-5 py-4 text-sm">
+                <div className="flex gap-3">
+                  <dt className="w-24 shrink-0 text-ink-400">From</dt>
+                  <dd className="text-ink-800">
+                    {EVENT.name} &lt;{EVENT.contact.email}&gt;
+                  </dd>
+                </div>
+                <div className="flex gap-3">
+                  <dt className="w-24 shrink-0 text-ink-400">Subject</dt>
+                  <dd className="text-ink-800">
+                    🎟️ You&apos;re in! Your {EVENT.name} pass is here ({booking.id})
+                  </dd>
+                </div>
+                <div className="flex gap-3">
+                  <dt className="w-24 shrink-0 text-ink-400">Attachment</dt>
+                  <dd className="text-ink-800">GarbaVerse-Pass-{booking.id}.pdf</dd>
+                </div>
+              </dl>
+              <iframe
+                title="GarbaVerse pass email"
+                srcDoc={emailHtml}
+                className="block h-[1100px] w-full border-0 bg-[#e6d2ae]"
+              />
+            </div>
+          </div>
+        ) : v === "pass" ? (
           <div className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
             <div className="text-center">
               <p className="eyebrow">Design preview</p>

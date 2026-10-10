@@ -159,11 +159,11 @@ export default function PassEmail(p: PassEmailProps) {
                     cellPadding={0}
                     cellSpacing={0}
                     align="right"
-                    style={{ backgroundColor: "#ffffff", borderRadius: 14, padding: 8 }}
+                    style={{ backgroundColor: "#ffffff", borderRadius: 14 }}
                   >
                     <tbody>
                       <tr>
-                        <td>
+                        <td style={{ padding: 8 }}>
                           <Img
                             src={p.qrImageUrl}
                             width={150}
@@ -173,20 +173,22 @@ export default function PassEmail(p: PassEmailProps) {
                           />
                         </td>
                       </tr>
+                      <tr>
+                        <td
+                          style={{
+                            padding: "0 8px 10px",
+                            color: MUTED,
+                            fontSize: 10,
+                            letterSpacing: 2,
+                            textTransform: "uppercase",
+                            textAlign: "center",
+                          }}
+                        >
+                          Scan at gate
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
-                  <Text
-                    style={{
-                      margin: "8px 0 0",
-                      color: MUTED,
-                      fontSize: 10,
-                      letterSpacing: 2,
-                      textTransform: "uppercase",
-                      textAlign: "right",
-                    }}
-                  >
-                    Scan at gate
-                  </Text>
                 </Column>
               </Row>
             </Section>
@@ -356,11 +358,11 @@ PassEmail.PreviewProps = {
   timeLabel: "6:00 PM – 11:00 PM",
   venueName: "Gymkhana Cricket Ground",
   venueAddress: "Secunderabad, Hyderabad",
-  mapsUrl: "https://maps.google.com",
+  mapsUrl: "https://www.google.com/maps/search/?api=1&query=Gymkhana+Cricket+Ground+Secunderabad",
   qrImageUrl: "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=GV-7K3M9Q",
-  passUrl: "https://example.com/booking/GV-7K3M9Q",
-  pdfUrl: "https://example.com/api/pass/GV-7K3M9Q/pdf",
-  icsUrl: "https://example.com/api/pass/GV-7K3M9Q/ics",
+  passUrl: "/preview?v=pass",
+  pdfUrl: "/preview?v=pass",
+  icsUrl: "/preview?v=pass",
   googleCalUrl: "https://calendar.google.com",
   supportEmail: "studentsurge@gmail.com",
   gatesLabel: "5:30 PM",
