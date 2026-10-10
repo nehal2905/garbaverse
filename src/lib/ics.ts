@@ -1,4 +1,4 @@
-import { EVENT, GATES_OPEN_LABEL } from "./event";
+import { EVENT, GATES_OPEN_LABEL, bookingNight, nightEndsAt, nightStartsAt } from "./event";
 
 function toICSDate(iso: string) {
   // UTC, e.g. 20261010T123000Z
@@ -38,13 +38,14 @@ function fold(line: string) {
   return out.join("\r\n");
 }
 
-export function buildICS(params: { bookingId: string; name: string; passUrl: string }) {
+export function buildICS(params: { bookingId: string; name: string; passUrl: string; eventDate?: string }) {
+  const night = bookingNight(params.eventDate);
   const uid = `${params.bookingId}@garbaverse`;
   const description = [
     `Your ${EVENT.name} pass (${params.bookingId}) is confirmed.`,
     `Booked for: ${params.name}`,
     `Show your QR at the gate: ${params.passUrl}`,
-    `Gates open ${GATES_OPEN_LABEL} each night.`,
+    `Gates open ${GATES_OPEN_LABEL}.`,
   ].join("\n");
 
   const lines = [
@@ -56,8 +57,8 @@ export function buildICS(params: { bookingId: string; name: string; passUrl: str
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${toICSDate(new Date().toISOString())}`,
-    `DTSTART:${toICSDate(EVENT.startsAt)}`,
-    `DTEND:${toICSDate(EVENT.endsAt)}`,
+    `DTSTART:${toICSDate(nightStartsAt(night))}`,
+    `DTEND:${toICSDate(nightEndsAt(night))}`,
     `SUMMARY:${escapeText(`${EVENT.name} — ${EVENT.subtitle}`)}`,
     `DESCRIPTION:${escapeText(description)}`,
     `LOCATION:${escapeText(`${EVENT.venue.name}, ${EVENT.venue.address}`)}`,
@@ -76,11 +77,12 @@ export function buildICS(params: { bookingId: string; name: string; passUrl: str
 }
 
 /** Google Calendar deep link (works without a file download on Android). */
-export function googleCalendarUrl(params: { bookingId: string; passUrl: string }) {
+export function googleCalendarUrl(params: { bookingId: string; passUrl: string; eventDate?: string }) {
+  const night = bookingNight(params.eventDate);
   const q = new URLSearchParams({
     action: "TEMPLATE",
     text: `${EVENT.name} — ${EVENT.subtitle}`,
-    dates: `${toICSDate(EVENT.startsAt)}/${toICSDate(EVENT.endsAt)}`,
+    dates: `${toICSDate(nightStartsAt(night))}/${toICSDate(nightEndsAt(night))}`,
     details: `Pass ${params.bookingId}. Show your QR at the gate: ${params.passUrl}`,
     location: `${EVENT.venue.name}, ${EVENT.venue.address}`,
     ctz: EVENT.timezone,

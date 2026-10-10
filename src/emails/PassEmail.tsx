@@ -45,6 +45,8 @@ export interface PassEmailProps {
   gatesLabel: string;
   startLabel: string;
   ageNote: string;
+  organiserLogoUrl?: string;
+  partnerLogoUrl?: string;
 }
 
 // Brand: Ivory Invitation (mirrors tailwind.config.ts tokens).
@@ -71,6 +73,54 @@ export default function PassEmail(p: PassEmailProps) {
         <Container style={{ maxWidth: 560, margin: "0 auto", padding: "24px 12px" }}>
           {/* Header */}
           <Section style={{ textAlign: "center", padding: "8px 0 20px" }}>
+            {(p.organiserLogoUrl || p.partnerLogoUrl) && (
+              <Row>
+                {p.organiserLogoUrl ? (
+                  <Column style={{ padding: "0 8px 12px", textAlign: "center" }}>
+                    <Text
+                      style={{
+                        margin: "0 0 6px",
+                        color: MUTED,
+                        fontSize: 9,
+                        letterSpacing: 2,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Organised by
+                    </Text>
+                    <Img
+                      src={p.organiserLogoUrl}
+                      alt={p.organiser}
+                      width={150}
+                      height={44}
+                      style={{ display: "inline-block", width: 150, height: "auto" }}
+                    />
+                  </Column>
+                ) : null}
+                {p.partnerLogoUrl ? (
+                  <Column style={{ padding: "0 8px 12px", textAlign: "center" }}>
+                    <Text
+                      style={{
+                        margin: "0 0 6px",
+                        color: MUTED,
+                        fontSize: 9,
+                        letterSpacing: 2,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Photography partner
+                    </Text>
+                    <Img
+                      src={p.partnerLogoUrl}
+                      alt="DR Photo Studios"
+                      width={168}
+                      height={40}
+                      style={{ display: "inline-block", width: 168, height: "auto" }}
+                    />
+                  </Column>
+                ) : null}
+              </Row>
+            )}
             <Text
               style={{
                 margin: 0,
@@ -354,7 +404,7 @@ PassEmail.PreviewProps = {
   eventName: "GarbaVerse",
   eventSubtitle: "Garba & Dandiya Nights",
   organiser: "Student Surge",
-  dateLabel: "17–20 October 2026",
+  dateLabel: "Saturday, 17 October 2026",
   timeLabel: "6:00 PM – 11:00 PM",
   venueName: "Gymkhana Cricket Ground",
   venueAddress: "Secunderabad, Hyderabad",

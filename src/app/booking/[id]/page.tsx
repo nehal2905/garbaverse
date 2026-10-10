@@ -37,7 +37,11 @@ export default async function BookingPage({
           <BookingStatus
             initial={toPublicBooking(res.booking, res.tier)}
             token={t!}
-            googleCalUrl={googleCalendarUrl({ bookingId: id, passUrl: passLinks(res.booking).view })}
+            googleCalUrl={googleCalendarUrl({
+              bookingId: id,
+              passUrl: passLinks(res.booking).view,
+              eventDate: res.booking.event_date,
+            })}
           />
         ) : (
           <div className="mx-auto max-w-md px-4 pt-40 text-center">

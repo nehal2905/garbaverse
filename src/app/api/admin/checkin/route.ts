@@ -51,6 +51,7 @@ export async function POST(req: Request) {
           id: details.booking.id,
           name: details.booking.name,
           tier: details.tier.name,
+          event_date: details.booking.event_date,
           quantity: details.booking.quantity,
           attendees: details.booking.attendees,
           status: details.booking.status,

@@ -4,7 +4,7 @@ import { render } from "@react-email/render";
 import React from "react";
 import PassEmail from "@/emails/PassEmail";
 import { env } from "./env";
-import { EVENT, EVENT_DATE_LABEL, EVENT_TIME_LABEL, GATES_OPEN_LABEL, formatEventTime } from "./event";
+import { EVENT, EVENT_TIME_LABEL, GATES_OPEN_LABEL, bookingNight, brandLogoUrl, formatEventNight, formatEventTime } from "./event";
 import { formatINR } from "./utils";
 import { passLinks } from "./links";
 import { googleCalendarUrl } from "./ics";
@@ -26,7 +26,8 @@ export async function sendPassEmail(booking: Booking, tier: TicketType) {
   const links = passLinks(booking);
   const qrPayload = signBookingId(booking.id);
   const qrImageUrl = `${env.siteUrl}/api/pass/${booking.id}/qr.png?t=${links.token}`;
-  const googleCalUrl = googleCalendarUrl({ bookingId: booking.id, passUrl: links.view });
+  const night = bookingNight(booking.event_date);
+  const googleCalUrl = googleCalendarUrl({ bookingId: booking.id, passUrl: links.view, eventDate: night });
 
   const props = {
     attendeeName: booking.name,
@@ -38,7 +39,7 @@ export async function sendPassEmail(booking: Booking, tier: TicketType) {
     eventName: EVENT.name,
     eventSubtitle: EVENT.subtitle,
     organiser: EVENT.organiser,
-    dateLabel: EVENT_DATE_LABEL,
+    dateLabel: formatEventNight(night),
     timeLabel: EVENT_TIME_LABEL,
     venueName: EVENT.venue.name,
     venueAddress: EVENT.venue.address,
@@ -52,6 +53,8 @@ export async function sendPassEmail(booking: Booking, tier: TicketType) {
     gatesLabel: GATES_OPEN_LABEL,
     startLabel: formatEventTime(EVENT.startsAt),
     ageNote: EVENT.ageNote,
+    organiserLogoUrl: brandLogoUrl(env.siteUrl, "organiser"),
+    partnerLogoUrl: brandLogoUrl(env.siteUrl, "partner"),
   };
 
   const element = React.createElement(PassEmail, props);
@@ -90,7 +93,7 @@ export async function sendPassEmail(booking: Booking, tier: TicketType) {
 /** Ensures the plain-text part always carries the essentials, even if the renderer trims. */
 function plainTextFallback(
   rendered: string,
-  p: { bookingId: string; attendeeName: string; tierName: string; passUrl: string; pdfUrl: string }
+  p: { bookingId: string; attendeeName: string; tierName: string; passUrl: string; pdfUrl: string; dateLabel: string }
 ) {
   const essentials = [
     `${EVENT.name} — ${EVENT.subtitle}`,
@@ -98,7 +101,7 @@ function plainTextFallback(
     `You're in, ${p.attendeeName}!`,
     `Booking ID: ${p.bookingId}`,
     `Pass: ${p.tierName}`,
-    `When: ${EVENT_DATE_LABEL}, ${EVENT_TIME_LABEL} IST`,
+    `When: ${p.dateLabel}, ${EVENT_TIME_LABEL} IST`,
     `Where: ${EVENT.venue.name}, ${EVENT.venue.address}`,
     `Map: ${EVENT.venue.mapsUrl}`,
     ``,

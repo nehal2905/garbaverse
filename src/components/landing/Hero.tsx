@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { EVENT, EVENT_DATE_LABEL, EVENT_TIME_LABEL, formatEventDate } from "@/lib/event";
 import { CornerFlourish, Divider, Mandala } from "@/components/ui/Ornaments";
-import { PartnerLogo } from "@/components/ui/PartnerLogo";
+import { BrandPair } from "@/components/ui/PartnerLogo";
 import { Countdown } from "./Countdown";
 
 const step = (i: number) => ({ animationDelay: `${i * 0.1}s` });
@@ -17,14 +17,8 @@ export function Hero({ fromPrice }: { fromPrice: string }) {
 
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:pt-8">
         <div className="text-center lg:text-left">
-          <div
-            className="flex flex-col items-center gap-3 motion-safe:animate-fade-up lg:flex-row lg:items-center"
-            style={step(0)}
-          >
-            <PartnerLogo size="md" />
-            <p className="eyebrow text-center lg:text-left">
-              {EVENT.partner} × {EVENT.organiser}
-            </p>
+          <div className="motion-safe:animate-fade-up" style={step(0)}>
+            <BrandPair size="md" align="start" />
           </div>
 
           <h1

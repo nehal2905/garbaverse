@@ -3,7 +3,7 @@ import { BookingError, createPendingBooking } from "@/lib/bookings";
 import { passAccessToken } from "@/lib/signing";
 import { clientIp, fail, json, rateLimit } from "@/lib/http";
 import { missingCheckoutConfig } from "@/lib/env";
-import { EVENT, isSalesOpen } from "@/lib/event";
+import { EVENT, EVENT_NIGHTS, isSalesOpen } from "@/lib/event";
 import { publicPayment } from "@/lib/payment";
 import { normaliseIndianMobile } from "@/lib/utils";
 
@@ -11,6 +11,9 @@ export const dynamic = "force-dynamic";
 
 const schema = z.object({
   ticketTypeId: z.string().min(1).max(40),
+  eventDate: z.enum(EVENT_NIGHTS, {
+    errorMap: () => ({ message: "Please choose which night you want the pass for." }),
+  }),
   quantity: z.coerce.number().int().min(1).max(20),
   name: z
     .string()

@@ -7,6 +7,7 @@ export class BookingError extends Error {
       | "TICKET_TYPE_NOT_FOUND"
       | "QUANTITY_EXCEEDS_LIMIT"
       | "INVALID_QUANTITY"
+      | "INVALID_EVENT_DATE"
       | "BOOKING_NOT_FOUND"
       | "UNKNOWN",
     message: string,
@@ -37,6 +38,8 @@ export interface TicketType {
 export interface Booking {
   id: string;
   ticket_type_id: string;
+  /** YYYY-MM-DD of the night this pass admits. */
+  event_date: string;
   quantity: number;
   attendees: number;
   amount_paise: number;
@@ -68,6 +71,7 @@ export interface PublicBooking {
   quantity: number;
   attendees: number;
   amount_paise: number;
+  event_date: string;
   ticket_type: { id: string; name: string; admits: number };
   expires_at: string;
   confirmed_at: string | null;

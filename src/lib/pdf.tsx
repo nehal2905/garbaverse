@@ -1,4 +1,6 @@
 import "server-only";
+import path from "node:path";
+import { readFile } from "node:fs/promises";
 import React from "react";
 import {
   Document,
@@ -10,7 +12,7 @@ import {
   Font,
   renderToBuffer,
 } from "@react-pdf/renderer";
-import { EVENT, EVENT_DATE_LABEL, EVENT_TIME_LABEL, GATES_OPEN_LABEL } from "./event";
+import { EVENT, EVENT_TIME_LABEL, GATES_OPEN_LABEL, bookingNight, formatEventNight } from "./event";
 // Built-in PDF fonts (Helvetica/Times/Courier) are WinAnsi-only: no ₹ glyph.
 import { formatINRPlain } from "./utils";
 import { qrDataUrl } from "./qr";
@@ -127,6 +129,15 @@ const s = StyleSheet.create({
   },
   footerText: { color: SURFACE, fontSize: 8.5, lineHeight: 1.5 },
   amount: { color: ACCENT_LIGHT, fontSize: 16, fontFamily: "Helvetica-Bold" },
+  logos: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 16,
+  },
+  organiserLogo: { width: 118, height: 34, objectFit: "contain" },
+  partnerLogo: { width: 136, height: 32, objectFit: "contain" },
 });
 
 export async function renderPassPdf(params: {
@@ -135,7 +146,12 @@ export async function renderPassPdf(params: {
   qrPayload: string;
 }) {
   const { booking, tier, qrPayload } = params;
-  const qr = await qrDataUrl(qrPayload, 600);
+  const art = (file: string) => path.join(process.cwd(), "public", "art", file);
+  const [qr, organiserLogo, partnerLogo] = await Promise.all([
+    qrDataUrl(qrPayload, 600),
+    readFile(art("student-surge.png")),
+    readFile(art("dr-photo-studios.png")),
+  ]);
 
   const doc = (
     <Document
@@ -146,6 +162,12 @@ export async function renderPassPdf(params: {
       <Page size={[460, 760]} style={s.page}>
         <View style={s.ticket}>
           <View style={s.header}>
+            <View style={s.logos}>
+              {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop */}
+              <Image src={organiserLogo} style={s.organiserLogo} />
+              {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop */}
+              <Image src={partnerLogo} style={s.partnerLogo} />
+            </View>
             <Text style={s.kicker}>{EVENT.organiser} presents</Text>
             <Text style={s.title}>{EVENT.name}</Text>
             <Text style={s.subtitle}>{EVENT.subtitle}</Text>
@@ -165,7 +187,7 @@ export async function renderPassPdf(params: {
 
               <Text style={s.label}>Date & time</Text>
               <Text style={s.valueSm}>
-                {EVENT_DATE_LABEL}
+                {formatEventNight(bookingNight(booking.event_date))}
                 {"\n"}
                 {EVENT_TIME_LABEL} IST
               </Text>

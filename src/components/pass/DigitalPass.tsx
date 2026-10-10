@@ -2,9 +2,10 @@
 
 import { motion } from "framer-motion";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
-import { EVENT, EVENT_DATE_LABEL, EVENT_TIME_LABEL } from "@/lib/event";
+import { EVENT, EVENT_TIME_LABEL, bookingNight, formatEventNight } from "@/lib/event";
 import { formatINR } from "@/lib/utils";
 import { Mandala } from "@/components/ui/Ornaments";
+import { BrandPair } from "@/components/ui/PartnerLogo";
 import type { PublicBooking } from "@/lib/types";
 
 interface Props {
@@ -35,7 +36,8 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
 
         {/* Header */}
         <div className="relative px-6 pt-6">
-          <p className="eyebrow">{EVENT.organiser} presents</p>
+          <BrandPair size="xs" align="start" className="!justify-start" />
+          <p className="eyebrow mt-4">{EVENT.organiser} presents</p>
           <h2 className="mt-1 font-display text-4xl font-black tracking-wide">
             <span className="text-brand-600">
               Garba<span className="font-normal">Verse</span>
@@ -58,7 +60,8 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
             </Field>
             <Field label="When">
               <span className="inline-flex items-center gap-1.5">
-                <CalendarDays className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> {EVENT_DATE_LABEL}
+                <CalendarDays className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" />{" "}
+                {formatEventNight(bookingNight(booking.event_date))}
               </span>
               <span className="mt-0.5 flex items-center gap-1.5 text-ink-600">
                 <Clock className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> {EVENT_TIME_LABEL}

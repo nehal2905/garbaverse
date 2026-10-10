@@ -2,12 +2,14 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Users } from "lucide-react";
+import { formatEventNight, type EventNight } from "@/lib/event";
 import { formatINR, pluralise } from "@/lib/utils";
 import type { TicketType } from "@/lib/types";
 
 interface Props {
   tier: TicketType | null;
   quantity: number;
+  night?: EventNight | null;
   compact?: boolean;
 }
 
@@ -17,7 +19,7 @@ export function computeTotal(tier: TicketType | null, quantity: number) {
 }
 
 /** Live summary — recomputed on every change. Server recomputes authoritatively. */
-export function PriceSummary({ tier, quantity, compact }: Props) {
+export function PriceSummary({ tier, quantity, night, compact }: Props) {
   const total = computeTotal(tier, quantity);
   const people = tier ? tier.admits * quantity : 0;
 
@@ -26,7 +28,7 @@ export function PriceSummary({ tier, quantity, compact }: Props) {
       <div className="flex items-baseline gap-2">
         <AnimatedAmount value={total} className="font-display text-2xl font-bold text-brand-600" />
         <span className="text-xs text-ink-500">
-          {tier ? `${tier.name} × ${quantity}` : "No pass selected"}
+          {tier ? `${tier.name} × ${quantity}${night ? ` · ${formatEventNight(night, { weekday: "short", year: undefined })}` : ""}` : "Pick a night"}
         </span>
       </div>
     );
@@ -52,6 +54,10 @@ export function PriceSummary({ tier, quantity, compact }: Props) {
               <span className="tabular-nums text-ink-900">{formatINR(tier.price_paise * quantity)}</span>
             </div>
             <div className="flex justify-between text-ink-500">
+              <span>Night</span>
+              <span>{night ? formatEventNight(night, { year: undefined }) : "Choose a night"}</span>
+            </div>
+            <div className="flex justify-between text-ink-500">
               <span className="inline-flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5" aria-hidden="true" /> Admits
               </span>
@@ -75,7 +81,7 @@ export function PriceSummary({ tier, quantity, compact }: Props) {
             exit={{ opacity: 0 }}
             className="mt-4 text-sm text-ink-500"
           >
-            Select a pass to see your total.
+            Select a night and a pass to see your total.
           </motion.p>
         )}
       </AnimatePresence>

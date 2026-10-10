@@ -6,9 +6,10 @@ export const EVENT = {
   name: "GarbaVerse",
   subtitle: "Garba & Dandiya Nights",
   organiser: "Student Surge",
+  organiserLogo: "/art/student-surge.png",
   tagline: "Where every twirl tells a story.",
   partner: "DR Photo Studios",
-  partnerLogo: "/art/dr-photo-studios.jpg",
+  partnerLogo: "/art/dr-photo-studios.png",
   // ISO strings with explicit IST offset.
   startsAt: "2026-10-17T18:00:00+05:30",
   endsAt: "2026-10-20T23:00:00+05:30",
@@ -97,6 +98,39 @@ export const EVENT_DATE_LABEL = formatEventDateRange();
 export const EVENT_TIME_LABEL = `${formatEventTime(EVENT.startsAt)} – ${formatEventTime(EVENT.endsAt)}`;
 export const GATES_OPEN_LABEL = formatEventTime(EVENT.gatesOpenAt); // "5:30 PM"
 
+/** One pass = one of these nights. Prices are per night. */
+export const EVENT_NIGHTS = ["2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20"] as const;
+export type EventNight = (typeof EVENT_NIGHTS)[number];
+
+export function isEventNight(value: string | null | undefined): value is EventNight {
+  return Boolean(value && (EVENT_NIGHTS as readonly string[]).includes(value));
+}
+
+export function bookingNight(date?: string | null): EventNight {
+  return isEventNight(date) ? date : EVENT_NIGHTS[0];
+}
+
+export function nightStartsAt(date: string) {
+  return `${date}T18:00:00+05:30`;
+}
+
+export function nightEndsAt(date: string) {
+  return `${date}T23:00:00+05:30`;
+}
+
+export function formatEventNight(
+  date: string = EVENT_NIGHTS[0],
+  opts: Intl.DateTimeFormatOptions = {}
+) {
+  return formatEventDate(nightStartsAt(date), opts);
+}
+
 export function isSalesOpen(now: number = Date.now()) {
   return now < new Date(EVENT.salesCloseAt).getTime();
+}
+
+/** Absolute URL for a brand mark (emails need a hosted PNG, not a relative path). */
+export function brandLogoUrl(origin: string, brand: "organiser" | "partner") {
+  const src = brand === "organiser" ? EVENT.organiserLogo : EVENT.partnerLogo;
+  return `${origin.replace(/\/+$/, "")}${src}`;
 }

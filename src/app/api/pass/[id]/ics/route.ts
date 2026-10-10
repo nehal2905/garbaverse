@@ -15,6 +15,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     bookingId: res.booking.id,
     name: res.booking.name,
     passUrl: passLinks(res.booking).view,
+    eventDate: res.booking.event_date,
   });
 
   return new Response(ics, {

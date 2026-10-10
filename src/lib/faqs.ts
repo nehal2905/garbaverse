@@ -15,7 +15,7 @@ export const faqs = [
   },
   {
     q: "Can I buy for friends?",
-    a: "Yes. Pick a quantity, or choose the Couple or Squad pass. One QR covers everyone in that booking — enter together.",
+    a: "Yes. Pick a quantity, or choose the Couple or Squad pass. Each pass is for one night — choose the date at checkout. One QR covers everyone in that booking — enter together.",
   },
   {
     q: "What about kids?",

@@ -7,7 +7,7 @@ import { DigitalPass } from "@/components/pass/DigitalPass";
 import { BookingFlow } from "@/components/booking/BookingFlow";
 import PassEmail from "@/emails/PassEmail";
 import { CATALOG } from "@/lib/catalog";
-import { EVENT } from "@/lib/event";
+import { EVENT, brandLogoUrl } from "@/lib/event";
 import { missingCheckoutConfig } from "@/lib/env";
 import { googleCalendarUrl } from "@/lib/ics";
 import type { PublicBooking } from "@/lib/types";
@@ -25,6 +25,7 @@ const booking: PublicBooking = {
   quantity: 1,
   attendees: 2,
   amount_paise: 50000,
+  event_date: "2026-10-17",
   ticket_type: { id: "couple", name: "Couple Pass", admits: 2 },
   expires_at: new Date().toISOString(),
   confirmed_at: new Date().toISOString(),
@@ -56,8 +57,10 @@ export default async function Preview({ searchParams }: { searchParams: Promise<
       passUrl,
       pdfUrl: passUrl,
       icsUrl: passUrl,
-      googleCalUrl: googleCalendarUrl({ bookingId: booking.id, passUrl }),
+      googleCalUrl: googleCalendarUrl({ bookingId: booking.id, passUrl, eventDate: booking.event_date }),
       supportEmail: EVENT.contact.email,
+      organiserLogoUrl: brandLogoUrl(origin, "organiser"),
+      partnerLogoUrl: brandLogoUrl(origin, "partner"),
     })
   );
 

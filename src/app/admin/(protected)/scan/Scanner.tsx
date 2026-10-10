@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Camera, CameraOff, CheckCircle2, Keyboard, Loader2, RotateCcw, XCircle } from "lucide-react";
+import { formatEventNight } from "@/lib/event";
 import { cn } from "@/lib/utils";
 
 type Code = "ok" | "already_used" | "not_confirmed" | "not_found" | "invalid_signature" | "error";
@@ -15,6 +16,7 @@ interface ScanResult {
     id: string;
     name: string;
     tier: string;
+    event_date?: string;
     quantity: number;
     attendees: number;
     status: string;
@@ -298,7 +300,11 @@ export function Scanner() {
                     <div className="mt-1 text-sm text-ink-800">
                       <div className="text-lg font-semibold">{result.booking.name}</div>
                       <div>
-                        {result.booking.tier} × {result.booking.quantity} ·{" "}
+                        {result.booking.tier} × {result.booking.quantity}
+                        {result.booking.event_date
+                          ? ` · ${formatEventNight(result.booking.event_date, { year: undefined })}`
+                          : ""}{" "}
+                        ·{" "}
                         <span className="font-bold text-brand-600">admits {result.booking.attendees}</span>
                       </div>
                       <div className="mt-1 font-mono text-xs text-ink-600">{result.booking.id}</div>

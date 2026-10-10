@@ -2,7 +2,7 @@ import "server-only";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { CATALOG } from "./catalog";
-import { EVENT } from "./event";
+import { EVENT, bookingNight, isEventNight } from "./event";
 import { generateBookingId } from "./signing";
 import { BookingError, type Booking, type BookingStatus, type TicketType } from "./types";
 
@@ -32,7 +32,9 @@ function read(): FileShape {
   try {
     const parsed = JSON.parse(readFileSync(FILE, "utf8")) as FileShape;
     if (!Array.isArray(parsed.bookings)) return empty();
-    return parsed;
+    return {
+      bookings: parsed.bookings.map((b) => ({ ...b, event_date: bookingNight(b.event_date) })),
+    };
   } catch {
     return empty();
   }
@@ -109,6 +111,7 @@ export function getBookingLocal(id: string): Booking | null {
 
 export function createPendingBookingLocal(input: {
   ticketTypeId: string;
+  eventDate: string;
   quantity: number;
   name: string;
   email: string;
@@ -118,6 +121,9 @@ export function createPendingBookingLocal(input: {
   expireInPlace(store);
   const base = CATALOG.find((t) => t.id === input.ticketTypeId && t.is_active);
   if (!base) throw new BookingError("TICKET_TYPE_NOT_FOUND", "That pass type no longer exists.");
+  if (!isEventNight(input.eventDate)) {
+    throw new BookingError("INVALID_EVENT_DATE", "Please choose which night you want the pass for.");
+  }
   if (input.quantity < 1) throw new BookingError("INVALID_QUANTITY", "Please choose at least one pass.");
   if (input.quantity > base.max_per_order) {
     throw new BookingError("QUANTITY_EXCEEDS_LIMIT", "That quantity exceeds the per-order limit.");
@@ -142,6 +148,7 @@ export function createPendingBookingLocal(input: {
   const booking: Booking = {
     id: generateBookingId(),
     ticket_type_id: base.id,
+    event_date: input.eventDate,
     quantity: input.quantity,
     attendees: input.quantity * base.admits,
     amount_paise: input.quantity * base.price_paise,

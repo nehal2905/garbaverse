@@ -2,6 +2,7 @@ import "server-only";
 import { supabaseAdmin } from "./supabase";
 import { generateBookingId, passAccessToken, signBookingId } from "./signing";
 import { CATALOG, isOnSale, isSupabaseConfigured, listedTiers } from "./catalog";
+import { bookingNight, isEventNight } from "./event";
 import { EVENT } from "./event";
 import { BookingError, type Booking, type PublicBooking, type TicketType } from "./types";
 import {
@@ -132,6 +133,7 @@ export async function getBookingWithTier(
 
 interface CreateInput {
   ticketTypeId: string;
+  eventDate: string;
   quantity: number;
   name: string;
   email: string;
@@ -142,6 +144,9 @@ interface CreateInput {
 export async function createPendingBooking(input: CreateInput): Promise<Booking> {
   if (!isOnSale(input.ticketTypeId)) {
     throw new BookingError("TICKET_TYPE_NOT_FOUND", "That pass type no longer exists.");
+  }
+  if (!isEventNight(input.eventDate)) {
+    throw new BookingError("INVALID_EVENT_DATE", "Please choose which night you want the pass for.");
   }
   if (!isSupabaseConfigured()) return createPendingBookingLocal(input);
   const db = supabaseAdmin();
@@ -156,7 +161,15 @@ export async function createPendingBooking(input: CreateInput): Promise<Booking>
       p_phone: input.phone,
       p_hold_minutes: EVENT.holdMinutes,
     });
-    if (!error) return data as Booking;
+    if (!error) {
+      const booking = { ...(data as Booking), event_date: input.eventDate };
+      const { error: patchErr } = await db
+        .from("bookings")
+        .update({ event_date: input.eventDate })
+        .eq("id", booking.id);
+      if (patchErr) console.error("[bookings] could not save event_date", patchErr);
+      return booking;
+    }
 
     // Primary-key collision → try a new ID.
     if (error.code === "23505" && /bookings_pkey/.test(error.message)) continue;
@@ -333,6 +346,7 @@ export function toPublicBooking(b: Booking, tier: TicketType): PublicBooking {
     quantity: b.quantity,
     attendees: b.attendees,
     amount_paise: b.amount_paise,
+    event_date: bookingNight(b.event_date),
     ticket_type: { id: tier.id, name: tier.name, admits: tier.admits },
     expires_at: b.expires_at,
     confirmed_at: b.confirmed_at,

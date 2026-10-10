@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, Zap, Ticket } from "lucide-react";
 import { TierCard, TierCardSkeleton } from "@/components/tiers/TierCard";
 import { Divider } from "@/components/ui/Ornaments";
+import { BrandPair } from "@/components/ui/PartnerLogo";
 import type { TicketType } from "@/lib/types";
 
 export function Tiers({ tiers }: { tiers: TicketType[] | null }) {
@@ -14,10 +15,11 @@ export function Tiers({ tiers }: { tiers: TicketType[] | null }) {
             Pick your <span className="accent-text">pass</span>
           </h2>
           <p className="mt-4 text-ink-600">
-            Every pass includes dandiya sticks, food court access and the photo booth. Prices are
-            inclusive of all taxes. Numbers below are live.
+            Prices are for one night — you pick the date at checkout. Inclusive of all taxes.
+            Numbers below are live.
           </p>
           <Divider className="mx-auto mt-6 max-w-xs" />
+          <BrandPair size="md" className="mt-8" />
         </div>
 
         <div className="mt-14 grid gap-6 pt-3 sm:grid-cols-2 lg:grid-cols-3">
