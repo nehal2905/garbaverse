@@ -19,12 +19,8 @@ interface Props {
  * a matte wine band, and a big scannable QR.
  */
 export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
-  const nights = booking.event_dates?.length ? booking.event_dates : bookingNights(booking.event_date);
-  const used = checkedInNights({
-    event_date: booking.event_date,
-    event_dates: booking.event_dates,
-    checked_in_at: booking.checked_in_at,
-  });
+  const nights = bookingNights(booking);
+  const used = checkedInNights(booking);
   const checkedIn = nights.length > 0 && nights.every((n) => used.includes(n));
   return (
     <motion.article
