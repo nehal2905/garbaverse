@@ -8,6 +8,13 @@ import {
   listBookingsLocal,
   undoCheckInLocal,
 } from "./local-store";
+import { getBooking } from "./bookings";
+import {
+  bookingNights,
+  checkedInNights,
+  nextCheckInNight,
+  serializeEventNights,
+} from "./event";
 import type { Booking, BookingStatus, TicketType } from "./types";
 
 export interface AdminBookingRow extends Booking {
@@ -121,20 +128,61 @@ export async function adminStats() {
 
 export async function checkInBooking(id: string, by: string) {
   if (!isSupabaseConfigured()) return checkInBookingLocal(id, by);
-  const { data, error } = await supabaseAdmin().rpc("check_in_booking", { p_id: id, p_by: by });
-  if (error) throw error;
-  const row = (Array.isArray(data) ? data[0] : data) as {
-    code: "ok" | "not_found" | "not_confirmed" | "already_used";
-    booking: Booking | null;
+  const booking = await getBooking(id);
+  if (!booking) return { code: "not_found" as const, booking: null };
+  if (booking.status !== "confirmed") return { code: "not_confirmed" as const, booking };
+  const used = checkedInNights(booking);
+  const next = nextCheckInNight(bookingNights(booking), used);
+  if (next.reason !== "ok" || !next.night) {
+    return { code: next.reason, booking };
+  }
+  const scanned = serializeEventNights([...used, next.night]);
+  const patch = {
+    checked_in_nights: scanned,
+    checked_in_at: booking.checked_in_at ?? new Date().toISOString(),
+    checked_in_by: by,
   };
-  return row;
+  const { data, error } = await supabaseAdmin()
+    .from("bookings")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+  if (error) {
+    // Column may be missing until schema.sql is re-run — fall back to one-scan RPC.
+    const { data: rpcData, error: rpcErr } = await supabaseAdmin().rpc("check_in_booking", {
+      p_id: id,
+      p_by: by,
+    });
+    if (rpcErr) throw rpcErr;
+    const row = (Array.isArray(rpcData) ? rpcData[0] : rpcData) as {
+      code: "ok" | "not_found" | "not_confirmed" | "already_used";
+      booking: Booking | null;
+    };
+    return row;
+  }
+  return { code: "ok" as const, booking: (data as Booking) ?? { ...booking, ...patch } };
 }
 
 export async function undoCheckIn(id: string) {
   if (!isSupabaseConfigured()) return undoCheckInLocal(id);
+  const booking = await getBooking(id);
+  if (!booking) return;
+  const used = checkedInNights(booking);
+  const remaining = used.slice(0, -1);
   const { error } = await supabaseAdmin()
     .from("bookings")
-    .update({ checked_in_at: null, checked_in_by: null })
+    .update({
+      checked_in_nights: remaining.length ? serializeEventNights(remaining) : null,
+      checked_in_at: remaining.length ? booking.checked_in_at : null,
+      checked_in_by: remaining.length ? booking.checked_in_by : null,
+    })
     .eq("id", id);
-  if (error) throw error;
+  if (error) {
+    const { error: fallback } = await supabaseAdmin()
+      .from("bookings")
+      .update({ checked_in_at: null, checked_in_by: null })
+      .eq("id", id);
+    if (fallback) throw fallback;
+  }
 }

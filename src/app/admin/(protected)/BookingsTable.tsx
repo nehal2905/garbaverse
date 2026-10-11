@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, Loader2, Mail, Search } from "lucide-react";
-import { formatEventNight } from "@/lib/event";
+import { bookingNights, formatEventNights } from "@/lib/event";
 import { cn, formatINR } from "@/lib/utils";
 import type { Booking, BookingStatus } from "@/lib/types";
 
@@ -178,7 +178,7 @@ export function BookingsTable() {
                     <td className="py-3 pr-4 text-ink-800">
                       {r.ticket_types?.name ?? r.ticket_type_id} × {r.quantity}
                       <div className="text-xs text-ink-500">
-                        {r.event_date ? formatEventNight(r.event_date, { year: undefined }) : "—"} · admits{" "}
+                        {formatEventNights(bookingNights(r))} · admits{" "}
                         {r.attendees}
                       </div>
                     </td>

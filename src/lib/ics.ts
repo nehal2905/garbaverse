@@ -1,4 +1,4 @@
-import { EVENT, GATES_OPEN_LABEL, bookingNight, nightEndsAt, nightStartsAt } from "./event";
+import { EVENT, GATES_OPEN_LABEL, bookingNights, formatEventNights, nightEndsAt, nightStartsAt } from "./event";
 
 function toICSDate(iso: string) {
   // UTC, e.g. 20261010T123000Z
@@ -38,28 +38,34 @@ function fold(line: string) {
   return out.join("\r\n");
 }
 
-export function buildICS(params: { bookingId: string; name: string; passUrl: string; eventDate?: string }) {
-  const night = bookingNight(params.eventDate);
-  const uid = `${params.bookingId}@garbaverse`;
+export function buildICS(params: {
+  bookingId: string;
+  name: string;
+  passUrl: string;
+  eventDate?: string;
+  eventDates?: string[];
+}) {
+  const nights = bookingNights(params.eventDates ?? params.eventDate);
+  const stamp = toICSDate(new Date().toISOString());
   const description = [
     `Your ${EVENT.name} pass (${params.bookingId}) is confirmed.`,
     `Booked for: ${params.name}`,
+    `Nights: ${formatEventNights(nights)}`,
     `Show your QR at the gate: ${params.passUrl}`,
     `Gates open ${GATES_OPEN_LABEL}.`,
   ].join("\n");
 
-  const lines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//GarbaVerse//Passes//EN",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
+  const events = nights.flatMap((night, i) => [
     "BEGIN:VEVENT",
-    `UID:${uid}`,
-    `DTSTAMP:${toICSDate(new Date().toISOString())}`,
+    `UID:${params.bookingId}-${night}@garbaverse`,
+    `DTSTAMP:${stamp}`,
     `DTSTART:${toICSDate(nightStartsAt(night))}`,
     `DTEND:${toICSDate(nightEndsAt(night))}`,
-    `SUMMARY:${escapeText(`${EVENT.name} — ${EVENT.subtitle}`)}`,
+    `SUMMARY:${escapeText(
+      nights.length > 1
+        ? `${EVENT.name} — night ${i + 1} of ${nights.length}`
+        : `${EVENT.name} — ${EVENT.subtitle}`
+    )}`,
     `DESCRIPTION:${escapeText(description)}`,
     `LOCATION:${escapeText(`${EVENT.venue.name}, ${EVENT.venue.address}`)}`,
     `URL:${params.passUrl}`,
@@ -71,19 +77,34 @@ export function buildICS(params: { bookingId: string; name: string; passUrl: str
     `DESCRIPTION:${escapeText(`${EVENT.name} starts in 3 hours — don't forget your pass!`)}`,
     "END:VALARM",
     "END:VEVENT",
+  ]);
+
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//GarbaVerse//Passes//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    ...events,
     "END:VCALENDAR",
   ];
   return lines.map(fold).join("\r\n") + "\r\n";
 }
 
 /** Google Calendar deep link (works without a file download on Android). */
-export function googleCalendarUrl(params: { bookingId: string; passUrl: string; eventDate?: string }) {
-  const night = bookingNight(params.eventDate);
+export function googleCalendarUrl(params: {
+  bookingId: string;
+  passUrl: string;
+  eventDate?: string;
+  eventDates?: string[];
+}) {
+  const nights = bookingNights(params.eventDates ?? params.eventDate);
+  const night = nights[0];
   const q = new URLSearchParams({
     action: "TEMPLATE",
     text: `${EVENT.name} — ${EVENT.subtitle}`,
     dates: `${toICSDate(nightStartsAt(night))}/${toICSDate(nightEndsAt(night))}`,
-    details: `Pass ${params.bookingId}. Show your QR at the gate: ${params.passUrl}`,
+    details: `Pass ${params.bookingId}. Nights: ${formatEventNights(nights)}. Show your QR at the gate: ${params.passUrl}`,
     location: `${EVENT.venue.name}, ${EVENT.venue.address}`,
     ctz: EVENT.timezone,
   });

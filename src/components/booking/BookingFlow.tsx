@@ -12,7 +12,7 @@ import { TierCard } from "@/components/tiers/TierCard";
 import { PayQr } from "./PayQr";
 import { BrandPair } from "@/components/ui/PartnerLogo";
 import { NightPicker } from "./NightPicker";
-import { EVENT, formatEventNight, type EventNight } from "@/lib/event";
+import { EVENT, formatEventNights, passAmountPaise, type EventNight } from "@/lib/event";
 import { cn, formatINR, normaliseIndianMobile, pluralise } from "@/lib/utils";
 import type { TicketType } from "@/lib/types";
 
@@ -45,7 +45,7 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
     const t = initialTiers.find((x) => x.id === initialTierId);
     return t && t.available > 0 ? t.id : null;
   });
-  const [night, setNight] = useState<EventNight | null>(null);
+  const [nights, setNights] = useState<EventNight[]>([]);
   const [qty, setQty] = useState(1);
   const [details, setDetails] = useState<Details>({ name: "", email: "", phone: "", agree: false });
   const [touched, setTouched] = useState<Partial<Record<keyof Details, boolean>>>({});
@@ -111,7 +111,7 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
 
   /* ───────────────────────── Payment ───────────────────────── */
   const startPay = async () => {
-    if (!tier || !night || checkout) return;
+    if (!tier || !nights.length || checkout) return;
     setError(null);
     setPaying("creating");
 
@@ -121,7 +121,7 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ticketTypeId: tier.id,
-          eventDate: night,
+          eventDates: nights,
           quantity: qty,
           name: details.name,
           email: details.email,
@@ -192,7 +192,7 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
     go(1);
   };
 
-  const total = tier ? tier.price_paise * qty : 0;
+  const total = tier && nights.length ? passAmountPaise(tier.price_paise, qty, nights.length) : 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-32 pt-24 sm:px-6 sm:pt-28 lg:pb-16">
@@ -232,7 +232,7 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
                 <ErrorBanner message={error} />
 
                 <div className="mt-6">
-                  <NightPicker value={night} onChange={setNight} />
+                  <NightPicker value={nights} onChange={setNights} />
                 </div>
 
                 <div role="radiogroup" aria-label="Pass type" className="mt-8 grid gap-4 pt-3 sm:grid-cols-2">
@@ -279,7 +279,7 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
                   <button
                     type="button"
                     onClick={() => go(1)}
-                    disabled={!tier || !night}
+                    disabled={!tier || !nights.length}
                     className="btn-primary w-full sm:w-auto"
                   >
                     Continue <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -367,8 +367,8 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
                         <Row label="Name">{details.name}</Row>
                         <Row label="Email">{details.email}</Row>
                         <Row label="Mobile">+91 {normaliseIndianMobile(details.phone) ?? details.phone}</Row>
-                        <Row label="Night">
-                          {night ? formatEventNight(night) : "—"}
+                        <Row label={nights.length > 1 ? "Nights" : "Night"}>
+                          {nights.length ? formatEventNights(nights) : "—"}
                           <span className="block text-sm font-normal text-ink-500">{EVENT.venue.name}</span>
                         </Row>
                         <Row label="Total">
@@ -451,19 +451,19 @@ export function BookingFlow({ initialTiers, initialTierId, checkoutReady = true 
 
         {/* ───────────── Sidebar summary (desktop) ───────────── */}
         <aside className="hidden lg:sticky lg:top-24 lg:block">
-          <PriceSummary tier={tier} quantity={qty} night={night} />
+          <PriceSummary tier={tier} quantity={qty} nights={nights} />
         </aside>
       </div>
 
       {/* ───────────── Sticky mobile bar ───────────── */}
       <div className="glass-strong safe-bottom fixed inset-x-0 bottom-0 z-40 border-t px-4 pt-3 lg:hidden">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
-          <PriceSummary tier={tier} quantity={qty} night={night} compact />
+          <PriceSummary tier={tier} quantity={qty} nights={nights} compact />
           {step === 0 && (
             <button
               type="button"
               onClick={() => go(1)}
-              disabled={!tier || !night}
+              disabled={!tier || !nights.length}
               className="btn-primary min-h-11 px-5 text-sm"
             >
               Continue

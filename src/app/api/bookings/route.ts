@@ -11,9 +11,8 @@ export const dynamic = "force-dynamic";
 
 const schema = z.object({
   ticketTypeId: z.string().min(1).max(40),
-  eventDate: z.enum(EVENT_NIGHTS, {
-    errorMap: () => ({ message: "Please choose which night you want the pass for." }),
-  }),
+  eventDates: z.array(z.enum(EVENT_NIGHTS)).max(EVENT_NIGHTS.length).optional().default([]),
+  eventDate: z.enum(EVENT_NIGHTS).optional(),
   quantity: z.coerce.number().int().min(1).max(20),
   name: z
     .string()
@@ -67,9 +66,13 @@ export async function POST(req: Request) {
   }
   const input = parsed.data;
   const phone = `+91${input.phone}`;
+  const eventDates = [...new Set(input.eventDates.length ? input.eventDates : input.eventDate ? [input.eventDate] : [])];
+  if (!eventDates.length) {
+    return fail(400, "Please choose which night you want the pass for.", { field: "eventDates" });
+  }
 
   try {
-    const booking = await createPendingBooking({ ...input, phone });
+    const booking = await createPendingBooking({ ...input, phone, eventDates });
     const pay = publicPayment();
     return json({
       bookingId: booking.id,

@@ -2,7 +2,7 @@ import "server-only";
 import { supabaseAdmin } from "./supabase";
 import { generateBookingId, passAccessToken, signBookingId } from "./signing";
 import { CATALOG, isOnSale, isSupabaseConfigured, listedTiers } from "./catalog";
-import { bookingNight, isEventNight } from "./event";
+import { bookingNight, bookingNights, parseEventNights, passAmountPaise, serializeEventNights } from "./event";
 import { EVENT } from "./event";
 import { BookingError, type Booking, type PublicBooking, type TicketType } from "./types";
 import {
@@ -133,7 +133,7 @@ export async function getBookingWithTier(
 
 interface CreateInput {
   ticketTypeId: string;
-  eventDate: string;
+  eventDates: string[];
   quantity: number;
   name: string;
   email: string;
@@ -145,10 +145,11 @@ export async function createPendingBooking(input: CreateInput): Promise<Booking>
   if (!isOnSale(input.ticketTypeId)) {
     throw new BookingError("TICKET_TYPE_NOT_FOUND", "That pass type no longer exists.");
   }
-  if (!isEventNight(input.eventDate)) {
+  const nights = parseEventNights(input.eventDates);
+  if (!nights.length) {
     throw new BookingError("INVALID_EVENT_DATE", "Please choose which night you want the pass for.");
   }
-  if (!isSupabaseConfigured()) return createPendingBookingLocal(input);
+  if (!isSupabaseConfigured()) return createPendingBookingLocal({ ...input, eventDates: nights });
   const db = supabaseAdmin();
   for (let attempt = 0; attempt < 5; attempt++) {
     const id = generateBookingId();
@@ -162,12 +163,27 @@ export async function createPendingBooking(input: CreateInput): Promise<Booking>
       p_hold_minutes: EVENT.holdMinutes,
     });
     if (!error) {
-      const booking = { ...(data as Booking), event_date: input.eventDate };
+      const created = data as Booking;
+      const amount = passAmountPaise(
+        Math.round(created.amount_paise / Math.max(1, created.quantity)),
+        created.quantity,
+        nights.length
+      );
+      const booking: Booking = {
+        ...created,
+        event_date: nights[0],
+        event_dates: serializeEventNights(nights),
+        amount_paise: amount,
+      };
       const { error: patchErr } = await db
         .from("bookings")
-        .update({ event_date: input.eventDate })
+        .update({
+          event_date: nights[0],
+          event_dates: booking.event_dates,
+          amount_paise: amount,
+        })
         .eq("id", booking.id);
-      if (patchErr) console.error("[bookings] could not save event_date", patchErr);
+      if (patchErr) console.error("[bookings] could not save event dates", patchErr);
       return booking;
     }
 
@@ -347,6 +363,7 @@ export function toPublicBooking(b: Booking, tier: TicketType): PublicBooking {
     attendees: b.attendees,
     amount_paise: b.amount_paise,
     event_date: bookingNight(b.event_date),
+    event_dates: bookingNights(b),
     ticket_type: { id: tier.id, name: tier.name, admits: tier.admits },
     expires_at: b.expires_at,
     confirmed_at: b.confirmed_at,

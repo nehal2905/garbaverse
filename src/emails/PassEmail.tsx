@@ -336,7 +336,7 @@ export default function PassEmail(p: PassEmailProps) {
             </Heading>
             <Text style={{ margin: 0, color: MUTED, fontSize: 14, lineHeight: 1.7 }}>
               • Gates open {p.gatesLabel}. Come early for the aarti at {p.startLabel}.
-              <br />• One scan per pass — the QR stops working after check-in.
+              <br />• One scan per booked night — the QR stays valid for unused nights.
               <br />• Traditional wear encouraged. Dandiya sticks are provided.
               <br />• Carry a valid photo ID. {p.ageNote}
             </Text>

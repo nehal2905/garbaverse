@@ -3,10 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Camera, CameraOff, CheckCircle2, Keyboard, Loader2, RotateCcw, XCircle } from "lucide-react";
-import { formatEventNight } from "@/lib/event";
+import { formatEventNights } from "@/lib/event";
 import { cn } from "@/lib/utils";
 
-type Code = "ok" | "already_used" | "not_confirmed" | "not_found" | "invalid_signature" | "error";
+type Code =
+  | "ok"
+  | "already_used"
+  | "wrong_night"
+  | "not_confirmed"
+  | "not_found"
+  | "invalid_signature"
+  | "error";
 
 interface ScanResult {
   code: Code;
@@ -17,6 +24,7 @@ interface ScanResult {
     name: string;
     tier: string;
     event_date?: string;
+    event_dates?: string[];
     quantity: number;
     attendees: number;
     status: string;
@@ -28,6 +36,7 @@ interface ScanResult {
 const MESSAGES: Record<Code, { title: string; tone: "ok" | "bad" | "warn" }> = {
   ok: { title: "Welcome in!", tone: "ok" },
   already_used: { title: "Already scanned", tone: "bad" },
+  wrong_night: { title: "Wrong night", tone: "warn" },
   not_confirmed: { title: "Not paid", tone: "bad" },
   not_found: { title: "Unknown pass", tone: "bad" },
   invalid_signature: { title: "Forged / invalid QR", tone: "bad" },
@@ -301,8 +310,8 @@ export function Scanner() {
                       <div className="text-lg font-semibold">{result.booking.name}</div>
                       <div>
                         {result.booking.tier} × {result.booking.quantity}
-                        {result.booking.event_date
-                          ? ` · ${formatEventNight(result.booking.event_date, { year: undefined })}`
+                        {result.booking.event_dates?.length || result.booking.event_date
+                          ? ` · ${formatEventNights(result.booking.event_dates?.length ? result.booking.event_dates : [result.booking.event_date!])}`
                           : ""}{" "}
                         ·{" "}
                         <span className="font-bold text-brand-600">admits {result.booking.attendees}</span>

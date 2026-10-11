@@ -38,8 +38,12 @@ export interface TicketType {
 export interface Booking {
   id: string;
   ticket_type_id: string;
-  /** YYYY-MM-DD of the night this pass admits. */
+  /** First booked night (YYYY-MM-DD). Prefer event_dates. */
   event_date: string;
+  /** Comma-separated YYYY-MM-DD nights this pass admits. */
+  event_dates?: string | null;
+  /** Comma-separated nights already scanned at the gate. */
+  checked_in_nights?: string | null;
   quantity: number;
   attendees: number;
   amount_paise: number;
@@ -72,6 +76,7 @@ export interface PublicBooking {
   attendees: number;
   amount_paise: number;
   event_date: string;
+  event_dates: string[];
   ticket_type: { id: string; name: string; admits: number };
   expires_at: string;
   confirmed_at: string | null;

@@ -8,6 +8,7 @@ import { getBookingWithTier, toPublicBooking } from "@/lib/bookings";
 import { verifyPassAccessToken } from "@/lib/signing";
 import { passLinks } from "@/lib/links";
 import { googleCalendarUrl } from "@/lib/ics";
+import { bookingNights } from "@/lib/event";
 import { BOOKING_ID_PATTERN } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Your pass", robots: { index: false, follow: false } };
@@ -40,7 +41,7 @@ export default async function BookingPage({
             googleCalUrl={googleCalendarUrl({
               bookingId: id,
               passUrl: passLinks(res.booking).view,
-              eventDate: res.booking.event_date,
+              eventDates: bookingNights(res.booking),
             })}
           />
         ) : (

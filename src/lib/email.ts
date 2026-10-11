@@ -4,7 +4,7 @@ import { render } from "@react-email/render";
 import React from "react";
 import PassEmail from "@/emails/PassEmail";
 import { env } from "./env";
-import { EVENT, EVENT_TIME_LABEL, GATES_OPEN_LABEL, bookingNight, brandLogoUrl, formatEventNight, formatEventTime } from "./event";
+import { EVENT, EVENT_TIME_LABEL, GATES_OPEN_LABEL, bookingNights, brandLogoUrl, formatEventNights, formatEventTime } from "./event";
 import { formatINR } from "./utils";
 import { passLinks } from "./links";
 import { googleCalendarUrl } from "./ics";
@@ -26,8 +26,12 @@ export async function sendPassEmail(booking: Booking, tier: TicketType) {
   const links = passLinks(booking);
   const qrPayload = signBookingId(booking.id);
   const qrImageUrl = `${env.siteUrl}/api/pass/${booking.id}/qr.png?t=${links.token}`;
-  const night = bookingNight(booking.event_date);
-  const googleCalUrl = googleCalendarUrl({ bookingId: booking.id, passUrl: links.view, eventDate: night });
+  const nights = bookingNights(booking);
+  const googleCalUrl = googleCalendarUrl({
+    bookingId: booking.id,
+    passUrl: links.view,
+    eventDates: nights,
+  });
 
   const props = {
     attendeeName: booking.name,
@@ -39,7 +43,7 @@ export async function sendPassEmail(booking: Booking, tier: TicketType) {
     eventName: EVENT.name,
     eventSubtitle: EVENT.subtitle,
     organiser: EVENT.organiser,
-    dateLabel: formatEventNight(night),
+    dateLabel: formatEventNights(nights),
     timeLabel: EVENT_TIME_LABEL,
     venueName: EVENT.venue.name,
     venueAddress: EVENT.venue.address,
@@ -108,7 +112,7 @@ function plainTextFallback(
     `View your pass & QR: ${p.passUrl}`,
     `Download PDF: ${p.pdfUrl}`,
     ``,
-    `Show the QR at the gate. One scan per pass. Questions: ${EVENT.contact.email}`,
+    `Show the QR at the gate. One scan per booked night. Questions: ${EVENT.contact.email}`,
   ].join("\n");
   return rendered && rendered.trim().length > 50 ? rendered : essentials;
 }

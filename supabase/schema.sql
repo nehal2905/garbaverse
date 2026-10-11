@@ -74,6 +74,8 @@ create table if not exists public.bookings (
 );
 
 alter table public.bookings add column if not exists event_date date;
+alter table public.bookings add column if not exists event_dates text;
+alter table public.bookings add column if not exists checked_in_nights text;
 
 create index if not exists bookings_email_idx      on public.bookings (lower(email));
 create index if not exists bookings_status_idx     on public.bookings (status, expires_at);

@@ -3,6 +3,7 @@ import { isAdminRequest } from "@/lib/admin-auth";
 import { checkInBooking, undoCheckIn } from "@/lib/admin-data";
 import { getBookingWithTier } from "@/lib/bookings";
 import { verifySignedBookingId } from "@/lib/signing";
+import { bookingNights, checkedInNights } from "@/lib/event";
 import { fail, json } from "@/lib/http";
 import { BOOKING_ID_PATTERN, normaliseBookingId } from "@/lib/utils";
 
@@ -52,6 +53,8 @@ export async function POST(req: Request) {
           name: details.booking.name,
           tier: details.tier.name,
           event_date: details.booking.event_date,
+          event_dates: bookingNights(details.booking),
+          checked_in_nights: checkedInNights(details.booking),
           quantity: details.booking.quantity,
           attendees: details.booking.attendees,
           status: details.booking.status,

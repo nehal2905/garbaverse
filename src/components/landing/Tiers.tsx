@@ -15,7 +15,7 @@ export function Tiers({ tiers }: { tiers: TicketType[] | null }) {
             Pick your <span className="accent-text">pass</span>
           </h2>
           <p className="mt-4 text-ink-600">
-            Prices are for one night — you pick the date at checkout. Inclusive of all taxes.
+            Prices are for one night — pick one or more dates at checkout. Inclusive of all taxes.
             Numbers below are live.
           </p>
           <Divider className="mx-auto mt-6 max-w-xs" />

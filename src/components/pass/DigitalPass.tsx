@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
-import { EVENT, EVENT_TIME_LABEL, bookingNight, formatEventNight } from "@/lib/event";
+import { EVENT, EVENT_TIME_LABEL, bookingNights, checkedInNights, formatEventNights } from "@/lib/event";
 import { formatINR } from "@/lib/utils";
 import { Mandala } from "@/components/ui/Ornaments";
 import { BrandPair } from "@/components/ui/PartnerLogo";
@@ -19,7 +19,13 @@ interface Props {
  * a matte wine band, and a big scannable QR.
  */
 export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
-  const checkedIn = Boolean(booking.checked_in_at);
+  const nights = booking.event_dates?.length ? booking.event_dates : bookingNights(booking.event_date);
+  const used = checkedInNights({
+    event_date: booking.event_date,
+    event_dates: booking.event_dates,
+    checked_in_at: booking.checked_in_at,
+  });
+  const checkedIn = nights.length > 0 && nights.every((n) => used.includes(n));
   return (
     <motion.article
       aria-label={`Pass for ${booking.name}, booking ${booking.id}`}
@@ -61,7 +67,7 @@ export function DigitalPass({ booking, qrSrc, reveal = true }: Props) {
             <Field label="When">
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" />{" "}
-                {formatEventNight(bookingNight(booking.event_date))}
+                {formatEventNights(nights)}
               </span>
               <span className="mt-0.5 flex items-center gap-1.5 text-ink-600">
                 <Clock className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" /> {EVENT_TIME_LABEL}

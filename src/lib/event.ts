@@ -98,7 +98,7 @@ export const EVENT_DATE_LABEL = formatEventDateRange();
 export const EVENT_TIME_LABEL = `${formatEventTime(EVENT.startsAt)} – ${formatEventTime(EVENT.endsAt)}`;
 export const GATES_OPEN_LABEL = formatEventTime(EVENT.gatesOpenAt); // "5:30 PM"
 
-/** One pass = one of these nights. Prices are per night. */
+/** A pass is for one or more of these nights. Prices are per night. */
 export const EVENT_NIGHTS = ["2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20"] as const;
 export type EventNight = (typeof EVENT_NIGHTS)[number];
 
@@ -106,8 +106,92 @@ export function isEventNight(value: string | null | undefined): value is EventNi
   return Boolean(value && (EVENT_NIGHTS as readonly string[]).includes(value));
 }
 
+export function parseEventNights(raw?: string | string[] | null): EventNight[] {
+  const parts = Array.isArray(raw)
+    ? raw
+    : String(raw ?? "")
+        .split(/[,\s]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+  return [...new Set(parts.filter(isEventNight))].sort() as EventNight[];
+}
+
+export function serializeEventNights(nights: readonly string[]): string {
+  return parseEventNights(nights as string[]).join(",");
+}
+
+export function bookingNights(
+  source?:
+    | string
+    | string[]
+    | null
+    | { event_date?: string | null; event_dates?: string | string[] | null }
+): EventNight[] {
+  if (!source) return [EVENT_NIGHTS[0]];
+  if (typeof source === "string" || Array.isArray(source)) {
+    const nights = parseEventNights(source);
+    return nights.length ? nights : [EVENT_NIGHTS[0]];
+  }
+  const many = parseEventNights(source.event_dates);
+  if (many.length) return many;
+  return [bookingNight(source.event_date)];
+}
+
 export function bookingNight(date?: string | null): EventNight {
-  return isEventNight(date) ? date : EVENT_NIGHTS[0];
+  return bookingNights(date)[0];
+}
+
+export function formatEventNights(dates: readonly string[] = [EVENT_NIGHTS[0]]) {
+  const nights = parseEventNights(dates as string[]);
+  const list = nights.length ? nights : [EVENT_NIGHTS[0]];
+  if (list.length === 1) return formatEventNight(list[0]);
+  const heads = list.slice(0, -1).map((n) => formatEventNight(n, { year: undefined }));
+  return `${heads.join(", ")} & ${formatEventNight(list[list.length - 1])}`;
+}
+
+export function passAmountPaise(unitPaise: number, quantity: number, nightCount: number) {
+  return unitPaise * quantity * Math.max(1, nightCount);
+}
+
+/** Today's calendar date in the event timezone, if it is one of the four nights. */
+export function todayEventNight(now: number = Date.now()): EventNight | null {
+  const ymd = new Intl.DateTimeFormat("en-CA", {
+    timeZone: EVENT.timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(now));
+  return isEventNight(ymd) ? ymd : null;
+}
+
+export function checkedInNights(source?: {
+  checked_in_nights?: string | string[] | null;
+  checked_in_at?: string | null;
+  event_date?: string | null;
+  event_dates?: string | string[] | null;
+}): EventNight[] {
+  const marked = parseEventNights(source?.checked_in_nights);
+  if (marked.length) return marked;
+  if (source?.checked_in_at) return [bookingNights(source)[0]];
+  return [];
+}
+
+export function nextCheckInNight(
+  booked: readonly string[],
+  already: readonly string[],
+  now: number = Date.now()
+): { night: EventNight | null; reason: "ok" | "wrong_night" | "already_used" } {
+  const nights = parseEventNights(booked as string[]);
+  const used = new Set(parseEventNights(already as string[]));
+  const unused = nights.filter((n) => !used.has(n));
+  if (!unused.length) return { night: null, reason: "already_used" };
+  const today = todayEventNight(now);
+  if (today) {
+    if (!nights.includes(today)) return { night: null, reason: "wrong_night" };
+    if (used.has(today)) return { night: null, reason: "already_used" };
+    return { night: today, reason: "ok" };
+  }
+  return { night: unused[0], reason: "ok" };
 }
 
 export function nightStartsAt(date: string) {

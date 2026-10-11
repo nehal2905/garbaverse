@@ -7,7 +7,7 @@ export const faqs = [
   },
   {
     q: "Do I need to print anything?",
-    a: "No. Show the QR on your phone at the gate. Printed PDFs work too. Each QR scans exactly once.",
+    a: "No. Show the QR on your phone at the gate. Printed PDFs work too. Each QR scans once per night you booked.",
   },
   {
     q: "Is there a dress code?",
@@ -15,7 +15,7 @@ export const faqs = [
   },
   {
     q: "Can I buy for friends?",
-    a: "Yes. Pick a quantity, or choose the Couple or Squad pass. Each pass is for one night — choose the date at checkout. One QR covers everyone in that booking — enter together.",
+    a: "Yes. Pick a quantity, or choose the Couple or Squad pass. Prices are per night — select every night you want at checkout. One QR covers everyone in that booking — enter together.",
   },
   {
     q: "What about kids?",

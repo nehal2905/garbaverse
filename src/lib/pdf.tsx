@@ -12,7 +12,7 @@ import {
   Font,
   renderToBuffer,
 } from "@react-pdf/renderer";
-import { EVENT, EVENT_TIME_LABEL, GATES_OPEN_LABEL, bookingNight, formatEventNight } from "./event";
+import { EVENT, EVENT_TIME_LABEL, GATES_OPEN_LABEL, bookingNights, formatEventNights } from "./event";
 // Built-in PDF fonts (Helvetica/Times/Courier) are WinAnsi-only: no ₹ glyph.
 import { formatINRPlain } from "./utils";
 import { qrDataUrl } from "./qr";
@@ -187,7 +187,7 @@ export async function renderPassPdf(params: {
 
               <Text style={s.label}>Date & time</Text>
               <Text style={s.valueSm}>
-                {formatEventNight(bookingNight(booking.event_date))}
+                {formatEventNights(bookingNights(booking))}
                 {"\n"}
                 {EVENT_TIME_LABEL} IST
               </Text>
@@ -230,8 +230,8 @@ export async function renderPassPdf(params: {
 
           <View style={s.footer}>
             <Text style={s.footerText}>
-              Present this QR (on screen or printed) at the gate. One scan per pass — the QR is
-              invalidated after check-in. Gates open {GATES_OPEN_LABEL}. Carry a valid ID. Non-transferable,
+              Present this QR (on screen or printed) at the gate. One scan per booked night.
+              Gates open {GATES_OPEN_LABEL}. Carry a valid ID. Non-transferable,
               non-refundable. Questions: {EVENT.contact.email}
             </Text>
           </View>

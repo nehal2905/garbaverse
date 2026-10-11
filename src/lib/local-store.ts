@@ -2,7 +2,15 @@ import "server-only";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { CATALOG } from "./catalog";
-import { EVENT, bookingNight, isEventNight } from "./event";
+import {
+  EVENT,
+  bookingNights,
+  checkedInNights,
+  nextCheckInNight,
+  parseEventNights,
+  passAmountPaise,
+  serializeEventNights,
+} from "./event";
 import { generateBookingId } from "./signing";
 import { BookingError, type Booking, type BookingStatus, type TicketType } from "./types";
 
@@ -33,7 +41,15 @@ function read(): FileShape {
     const parsed = JSON.parse(readFileSync(FILE, "utf8")) as FileShape;
     if (!Array.isArray(parsed.bookings)) return empty();
     return {
-      bookings: parsed.bookings.map((b) => ({ ...b, event_date: bookingNight(b.event_date) })),
+      bookings: parsed.bookings.map((b) => {
+        const nights = bookingNights(b);
+        return {
+          ...b,
+          event_date: nights[0],
+          event_dates: serializeEventNights(nights),
+          checked_in_nights: serializeEventNights(checkedInNights(b)) || null,
+        };
+      }),
     };
   } catch {
     return empty();
@@ -111,7 +127,7 @@ export function getBookingLocal(id: string): Booking | null {
 
 export function createPendingBookingLocal(input: {
   ticketTypeId: string;
-  eventDate: string;
+  eventDates: string[];
   quantity: number;
   name: string;
   email: string;
@@ -121,7 +137,8 @@ export function createPendingBookingLocal(input: {
   expireInPlace(store);
   const base = CATALOG.find((t) => t.id === input.ticketTypeId && t.is_active);
   if (!base) throw new BookingError("TICKET_TYPE_NOT_FOUND", "That pass type no longer exists.");
-  if (!isEventNight(input.eventDate)) {
+  const nights = parseEventNights(input.eventDates);
+  if (!nights.length) {
     throw new BookingError("INVALID_EVENT_DATE", "Please choose which night you want the pass for.");
   }
   if (input.quantity < 1) throw new BookingError("INVALID_QUANTITY", "Please choose at least one pass.");
@@ -148,10 +165,11 @@ export function createPendingBookingLocal(input: {
   const booking: Booking = {
     id: generateBookingId(),
     ticket_type_id: base.id,
-    event_date: input.eventDate,
+    event_date: nights[0],
+    event_dates: serializeEventNights(nights),
     quantity: input.quantity,
     attendees: input.quantity * base.admits,
-    amount_paise: input.quantity * base.price_paise,
+    amount_paise: passAmountPaise(base.price_paise, input.quantity, nights.length),
     currency: EVENT.currency,
     name: input.name,
     email: input.email.trim().toLowerCase(),
@@ -167,6 +185,7 @@ export function createPendingBookingLocal(input: {
     email_sent_at: null,
     checked_in_at: null,
     checked_in_by: null,
+    checked_in_nights: null,
     created_at: created,
     updated_at: created,
   };
@@ -333,8 +352,14 @@ export function checkInBookingLocal(id: string, by: string) {
   const b = store.bookings.find((x) => x.id === id);
   if (!b) return { code: "not_found" as const, booking: null };
   if (b.status !== "confirmed") return { code: "not_confirmed" as const, booking: b };
-  if (b.checked_in_at) return { code: "already_used" as const, booking: b };
-  b.checked_in_at = nowIso();
+  const used = checkedInNights(b);
+  const next = nextCheckInNight(bookingNights(b), used);
+  if (next.reason !== "ok" || !next.night) {
+    return { code: next.reason, booking: b };
+  }
+  const scanned = serializeEventNights([...used, next.night]);
+  b.checked_in_nights = scanned;
+  b.checked_in_at = b.checked_in_at ?? nowIso();
   b.checked_in_by = by;
   b.updated_at = nowIso();
   write(store);
@@ -345,8 +370,11 @@ export function undoCheckInLocal(id: string) {
   const store = read();
   const b = store.bookings.find((x) => x.id === id);
   if (!b) return;
-  b.checked_in_at = null;
-  b.checked_in_by = null;
+  const used = checkedInNights(b);
+  const remaining = used.slice(0, -1);
+  b.checked_in_nights = remaining.length ? serializeEventNights(remaining) : null;
+  b.checked_in_at = remaining.length ? b.checked_in_at : null;
+  b.checked_in_by = remaining.length ? b.checked_in_by : null;
   b.updated_at = nowIso();
   write(store);
 }

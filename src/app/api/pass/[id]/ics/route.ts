@@ -1,5 +1,6 @@
 import { loadConfirmedPass } from "@/lib/pass-access";
 import { buildICS } from "@/lib/ics";
+import { bookingNights } from "@/lib/event";
 import { passLinks } from "@/lib/links";
 import { fail } from "@/lib/http";
 
@@ -16,6 +17,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     name: res.booking.name,
     passUrl: passLinks(res.booking).view,
     eventDate: res.booking.event_date,
+    eventDates: bookingNights(res.booking),
   });
 
   return new Response(ics, {

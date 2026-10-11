@@ -18,9 +18,9 @@ export default function TermsPage() {
             {EVENT.venue.address}, organised by {EVENT.organiser}.
           </Section>
           <Section title="2. Passes">
-            A pass is a licence to enter the venue for the one night stated on the booking. Each booking carries one QR code
+            A pass is a licence to enter the venue on the night or nights stated on the booking. Each booking carries one QR code
             that admits the number of people stated on the pass; everyone on a booking must enter together.
-            The QR is invalidated after a single successful scan. Passes are non-transferable and must not
+            The QR is valid once per booked night. Passes are non-transferable and must not
             be resold.
           </Section>
           <Section title="3. Payments">
